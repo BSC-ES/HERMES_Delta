@@ -1,0 +1,2 @@
+[console_scripts]
+nes = nes.cli.cli:main

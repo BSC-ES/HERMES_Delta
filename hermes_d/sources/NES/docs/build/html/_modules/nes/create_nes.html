@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nes.create_nes &mdash; nes 1.1.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=df104e6e"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            nes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../object.html">The NES object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../methods.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../formats.html">Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../projections.html">Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">nes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nes.create_nes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nes.create_nes</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">netCDF4</span> <span class="kn">import</span> <span class="n">num2date</span>
+<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">from</span> <span class="nn">.nc_projections</span> <span class="kn">import</span> <span class="n">PointsNes</span><span class="p">,</span> <span class="n">LatLonNes</span><span class="p">,</span> <span class="n">RotatedNes</span><span class="p">,</span> <span class="n">RotatedNestedNes</span><span class="p">,</span> <span class="n">LCCNes</span><span class="p">,</span> <span class="n">MercatorNes</span>
+
+
+<div class="viewcode-block" id="create_nes">
+<a class="viewcode-back" href="../../object.html#nes.create_nes.create_nes">[docs]</a>
+<span class="k">def</span> <span class="nf">create_nes</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+               <span class="n">times</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">avoid_first_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">first_level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+               <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a Nes class from scratch.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    comm : MPI.Comm, optional</span>
+<span class="sd">        MPI Communicator. If None, uses MPI.COMM_WORLD.</span>
+<span class="sd">    info : bool, optional</span>
+<span class="sd">        Indicates if reading/writing info should be provided. Default is False.</span>
+<span class="sd">    projection : str, optional</span>
+<span class="sd">        The projection type. Accepted values are None, &quot;regular&quot;, &quot;global&quot;, &quot;rotated&quot;, &quot;rotated-nested&quot;, &quot;lcc&quot;,</span>
+<span class="sd">        &quot;mercator&quot;.</span>
+<span class="sd">    parallel_method : str, optional</span>
+<span class="sd">        The parallelization method to use. Default is &quot;Y&quot;. Accepted values are [&quot;X&quot;, &quot;Y&quot;, &quot;T&quot;].</span>
+<span class="sd">    balanced : bool, optional</span>
+<span class="sd">        Indicates if balanced parallelization is desired. Balanced datasets cannot be written in chunking mode.</span>
+<span class="sd">        Default is False.</span>
+<span class="sd">    times : list of datetime, optional</span>
+<span class="sd">        List of datetime objects representing the time dimension. If None, a default time array is created.</span>
+<span class="sd">    avoid_first_hours : int, optional</span>
+<span class="sd">        Number of hours to remove from the start of the time steps. Default is 0.</span>
+<span class="sd">    avoid_last_hours : int, optional</span>
+<span class="sd">        Number of hours to remove from the end of the time steps. Default is 0.</span>
+<span class="sd">    first_level : int, optional</span>
+<span class="sd">        Index of the first level to use. Default is 0.</span>
+<span class="sd">    last_level : int or None, optional</span>
+<span class="sd">        Index of the last level to use. If None, the last level is used. Default is None.</span>
+<span class="sd">    **kwargs : additional arguments</span>
+<span class="sd">        Additional parameters required for specific projections.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nes : Nes</span>
+<span class="sd">        An instance of the Nes class based on the specified parameters and projection.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If any required projection-specific parameters are missing or if invalid parameters are provided.</span>
+<span class="sd">    NotImplementedError</span>
+<span class="sd">        If an unsupported parallel method or projection type is specified.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    The function dynamically creates an instance of a specific Nes subclass based on the provided projection.</span>
+<span class="sd">    The required parameters for each projection type are:</span>
+<span class="sd">        - None: [&quot;lat&quot;, &quot;lon&quot;]</span>
+<span class="sd">        - &quot;regular&quot;: [&quot;lat_orig&quot;, &quot;lon_orig&quot;, &quot;inc_lat&quot;, &quot;inc_lon&quot;, &quot;n_lat&quot;, &quot;n_lon&quot;]</span>
+<span class="sd">        - &quot;global&quot;: [&quot;inc_lat&quot;, &quot;inc_lon&quot;]</span>
+<span class="sd">        - &quot;rotated&quot;: [&quot;centre_lat&quot;, &quot;centre_lon&quot;, &quot;west_boundary&quot;, &quot;south_boundary&quot;, &quot;inc_rlat&quot;, &quot;inc_rlon&quot;]</span>
+<span class="sd">        - &quot;rotated-nested&quot;: [&quot;parent_grid_path&quot;, &quot;parent_ratio&quot;, &quot;i_parent_start&quot;, &quot;j_parent_start&quot;, &quot;n_rlat&quot;, &quot;n_rlon&quot;]</span>
+<span class="sd">        - &quot;lcc&quot;: [&quot;lat_1&quot;, &quot;lat_2&quot;, &quot;lon_0&quot;, &quot;lat_0&quot;, &quot;nx&quot;, &quot;ny&quot;, &quot;inc_x&quot;, &quot;inc_y&quot;, &quot;x_0&quot;, &quot;y_0&quot;]</span>
+<span class="sd">        - &quot;mercator&quot;: [&quot;lat_ts&quot;, &quot;lon_0&quot;, &quot;nx&quot;, &quot;ny&quot;, &quot;inc_x&quot;, &quot;inc_y&quot;, &quot;x_0&quot;, &quot;y_0&quot;]</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; nes = create_nes(projection=&quot;regular&quot;, lat_orig=0, lon_orig=0, inc_lat=1, inc_lon=1, n_lat=180, n_lon=360)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        
+    <span class="k">if</span> <span class="n">comm</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">MPI</span><span class="o">.</span><span class="n">COMM_WORLD</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">comm</span> <span class="o">=</span> <span class="n">comm</span>
+
+    <span class="c1"># Create time array</span>
+    <span class="k">if</span> <span class="n">times</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;days since 1996-12-31 00:00:00&quot;</span>
+        <span class="n">calendar</span> <span class="o">=</span> <span class="s2">&quot;standard&quot;</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="n">num2date</span><span class="p">([</span><span class="mi">0</span><span class="p">],</span> <span class="n">units</span><span class="o">=</span><span class="n">units</span><span class="p">,</span> <span class="n">calendar</span><span class="o">=</span><span class="n">calendar</span><span class="p">)</span>
+        <span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="n">aux</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">for</span> <span class="n">aux</span> <span class="ow">in</span> <span class="n">times</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">times</span><span class="p">)</span>
+
+    <span class="c1"># Check if the parameters that are required to create the object have been defined in kwargs</span>
+    <span class="n">kwargs_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">kwargs_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">projection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">required_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;regular&quot;</span><span class="p">:</span>
+        <span class="n">required_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat_orig&quot;</span><span class="p">,</span> <span class="s2">&quot;lon_orig&quot;</span><span class="p">,</span> <span class="s2">&quot;inc_lat&quot;</span><span class="p">,</span> <span class="s2">&quot;inc_lon&quot;</span><span class="p">,</span> <span class="s2">&quot;n_lat&quot;</span><span class="p">,</span> <span class="s2">&quot;n_lon&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;global&quot;</span><span class="p">:</span>
+        <span class="n">required_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;inc_lat&quot;</span><span class="p">,</span> <span class="s2">&quot;inc_lon&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;rotated&quot;</span><span class="p">:</span>
+        <span class="n">required_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;centre_lat&quot;</span><span class="p">,</span> <span class="s2">&quot;centre_lon&quot;</span><span class="p">,</span> <span class="s2">&quot;west_boundary&quot;</span><span class="p">,</span> <span class="s2">&quot;south_boundary&quot;</span><span class="p">,</span> <span class="s2">&quot;inc_rlat&quot;</span><span class="p">,</span> <span class="s2">&quot;inc_rlon&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;rotated-nested&quot;</span><span class="p">:</span>
+        <span class="n">required_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;parent_grid_path&quot;</span><span class="p">,</span> <span class="s2">&quot;parent_ratio&quot;</span><span class="p">,</span> <span class="s2">&quot;i_parent_start&quot;</span><span class="p">,</span> <span class="s2">&quot;j_parent_start&quot;</span><span class="p">,</span> <span class="s2">&quot;n_rlat&quot;</span><span class="p">,</span> <span class="s2">&quot;n_rlon&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;lcc&quot;</span><span class="p">:</span>
+        <span class="n">required_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat_1&quot;</span><span class="p">,</span> <span class="s2">&quot;lat_2&quot;</span><span class="p">,</span> <span class="s2">&quot;lon_0&quot;</span><span class="p">,</span> <span class="s2">&quot;lat_0&quot;</span><span class="p">,</span> <span class="s2">&quot;nx&quot;</span><span class="p">,</span> <span class="s2">&quot;ny&quot;</span><span class="p">,</span> <span class="s2">&quot;inc_x&quot;</span><span class="p">,</span> <span class="s2">&quot;inc_y&quot;</span><span class="p">,</span> <span class="s2">&quot;x_0&quot;</span><span class="p">,</span> <span class="s2">&quot;y_0&quot;</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;mercator&quot;</span><span class="p">:</span>
+        <span class="n">required_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;lat_ts&quot;</span><span class="p">,</span> <span class="s2">&quot;lon_0&quot;</span><span class="p">,</span> <span class="s2">&quot;nx&quot;</span><span class="p">,</span> <span class="s2">&quot;ny&quot;</span><span class="p">,</span> <span class="s2">&quot;inc_x&quot;</span><span class="p">,</span> <span class="s2">&quot;inc_y&quot;</span><span class="p">,</span> <span class="s2">&quot;x_0&quot;</span><span class="p">,</span> <span class="s2">&quot;y_0&quot;</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown projection: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">projection</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">required_vars</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs_list</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Variable </span><span class="si">{0}</span><span class="s2"> has not been defined. &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;For a </span><span class="si">{}</span><span class="s2"> projection, it is necessary to define </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">projection</span><span class="p">,</span> <span class="n">required_vars</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">kwargs_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">var</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">required_vars</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Variable </span><span class="si">{0}</span><span class="s2"> has been defined. &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;For a </span><span class="si">{}</span><span class="s2"> projection, you can only define </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">projection</span><span class="p">,</span> <span class="n">required_vars</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">projection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">parallel_method</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Parallel method cannot be &#39;Y&#39; to create points NES. Setting it to &#39;X&#39;&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">parallel_method</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
+        <span class="k">elif</span> <span class="n">parallel_method</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Parallel method T not implemented yet&quot;</span><span class="p">)</span>
+        <span class="n">nessy</span> <span class="o">=</span> <span class="n">PointsNes</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span>
+                          <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span>
+                          <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span>
+                          <span class="n">create_nes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;regular&quot;</span><span class="p">,</span> <span class="s2">&quot;global&quot;</span><span class="p">]:</span>
+        <span class="n">nessy</span> <span class="o">=</span> <span class="n">LatLonNes</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span>
+                          <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span>
+                          <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span>
+                          <span class="n">create_nes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;rotated&quot;</span><span class="p">:</span>
+        <span class="n">nessy</span> <span class="o">=</span> <span class="n">RotatedNes</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span>
+                           <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span>
+                           <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span>
+                           <span class="n">create_nes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;rotated-nested&quot;</span><span class="p">:</span>
+        <span class="n">nessy</span> <span class="o">=</span> <span class="n">RotatedNestedNes</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span>
+                                 <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span>
+                                 <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span>
+                                 <span class="n">create_nes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;lcc&quot;</span><span class="p">:</span>
+        <span class="n">nessy</span> <span class="o">=</span> <span class="n">LCCNes</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span>
+                       <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span>
+                       <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span>
+                       <span class="n">create_nes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">projection</span> <span class="o">==</span> <span class="s2">&quot;mercator&quot;</span><span class="p">:</span>
+        <span class="n">nessy</span> <span class="o">=</span> <span class="n">MercatorNes</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span>
+                            <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span>
+                            <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span>
+                            <span class="n">create_nes</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">projection</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">nessy</span></div>
+
+    
+
+<div class="viewcode-block" id="from_shapefile">
+<a class="viewcode-back" href="../../object.html#nes.create_nes.from_shapefile">[docs]</a>
+<span class="k">def</span> <span class="nf">from_shapefile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create NES from shapefile data.</span>
+<span class="sd">    </span>
+<span class="sd">    1. Create NES grid.</span>
+<span class="sd">    2. Create shapefile for grid.</span>
+<span class="sd">    3. Spatial join to add shapefile variables to NES variables.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    path : str</span>
+<span class="sd">        Path to shapefile.</span>
+<span class="sd">    method : str</span>
+<span class="sd">        Overlay method. Accepted values: [&quot;nearest&quot;, &quot;intersection&quot;, None].</span>
+<span class="sd">    parallel_method : str</span>
+<span class="sd">        Indicates the parallelization method that you want. Default: &quot;Y&quot;.</span>
+<span class="sd">        accepted values: [&quot;X&quot;, &quot;Y&quot;, &quot;T&quot;].</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Create NES</span>
+    <span class="n">nessy</span> <span class="o">=</span> <span class="n">create_nes</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c1"># Create shapefile for grid</span>
+    <span class="n">nessy</span><span class="o">.</span><span class="n">create_shapefile</span><span class="p">()</span>
+
+    <span class="c1"># Make spatial join</span>
+    <span class="n">nessy</span><span class="o">.</span><span class="n">spatial_join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">nessy</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Carles Tena Medina, Alba Vilanova Cortezon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
