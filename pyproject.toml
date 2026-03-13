@@ -1,0 +1,18 @@
+# pyproject.toml — Modern build system definition for HERMES
+
+[build-system]
+# 'requires' lists the packages needed **to build** the project (not to run it).
+# These are installed in a temporary, isolated environment during `pip install -e .`
+# ONLY include packages that are strictly needed for setup.py or modules imported by it.
+
+requires = [
+    "setuptools>=66.1.1",  # Core build backend
+    "wheel",               # Required to build wheels, even if not used directly
+    "numpy",               # Imported in nes/__init__.py via load_nes.py
+    "pandas",              # Likely imported early in NES modules
+    "pyproj",              # Used for CRS definitions and transformations
+    "shapely"              # Required for geometry operations in early imports
+]
+
+# Defines the build backend interface. setuptools is standard for Python packages.
+build-backend = "setuptools.build_meta"

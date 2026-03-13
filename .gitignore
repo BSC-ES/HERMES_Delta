@@ -1,0 +1,8 @@
+*__pycache__*
+*.pyc
+*.pkl
+.idea/
+
+# Unignore .pkl files under tests/test_data/
+!hermes/hermesv3_d/tests/test_data/*.pkl
+

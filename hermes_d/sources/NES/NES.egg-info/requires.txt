@@ -1,0 +1,13 @@
+geopandas
+rtree>=0.9.0
+pandas
+netcdf4
+numpy
+pyproj
+setuptools
+scipy
+filelock
+eccodes
+mpi4py
+shapely
+python-dateutil
