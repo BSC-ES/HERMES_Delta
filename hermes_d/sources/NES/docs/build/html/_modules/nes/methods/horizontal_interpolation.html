@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nes.methods.horizontal_interpolation &mdash; nes 1.1.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=df104e6e"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            nes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../object.html">The NES object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../methods.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../formats.html">Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../projections.html">Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">nes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nes.methods.horizontal_interpolation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nes.methods.horizontal_interpolation</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">nes</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span><span class="p">,</span> <span class="n">filterwarnings</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="p">(</span><span class="n">ma</span><span class="p">,</span> <span class="n">empty</span><span class="p">,</span> <span class="n">nansum</span><span class="p">,</span> <span class="n">concatenate</span><span class="p">,</span> <span class="n">pad</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">float64</span><span class="p">,</span> <span class="n">int64</span><span class="p">,</span> <span class="n">float32</span><span class="p">,</span> <span class="n">meshgrid</span><span class="p">,</span> <span class="n">expand_dims</span><span class="p">,</span> 
+                   <span class="n">reciprocal</span><span class="p">,</span> <span class="n">arange</span><span class="p">,</span> <span class="n">uint32</span><span class="p">,</span> <span class="n">array_split</span><span class="p">,</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">column_stack</span><span class="p">,</span> <span class="n">zeros</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">concat</span><span class="p">,</span> <span class="n">DataFrame</span>
+<span class="kn">from</span> <span class="nn">mpi4py</span> <span class="kn">import</span> <span class="n">MPI</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">spatial</span>
+<span class="kn">from</span> <span class="nn">filelock</span> <span class="kn">import</span> <span class="n">FileLock</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">Proj</span><span class="p">,</span> <span class="n">Transformer</span><span class="p">,</span> <span class="n">CRS</span>
+<span class="kn">import</span> <span class="nn">gc</span>
+
+<span class="c1"># CONSTANTS</span>
+<span class="n">NEAREST_OPTS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;NearestNeighbour&quot;</span><span class="p">,</span> <span class="s2">&quot;NearestNeighbours&quot;</span><span class="p">,</span> <span class="s2">&quot;nn&quot;</span><span class="p">,</span> <span class="s2">&quot;NN&quot;</span><span class="p">]</span>
+<span class="n">CONSERVATIVE_OPTS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Conservative&quot;</span><span class="p">,</span> <span class="s2">&quot;Area_Conservative&quot;</span><span class="p">,</span> <span class="s2">&quot;cons&quot;</span><span class="p">,</span> <span class="s2">&quot;conservative&quot;</span><span class="p">,</span> <span class="s2">&quot;area&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="interpolate_horizontal">
+<a class="viewcode-back" href="../../../methods.html#nes.methods.horizontal_interpolation.interpolate_horizontal">[docs]</a>
+<span class="k">def</span> <span class="nf">interpolate_horizontal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">weight_matrix_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;NearestNeighbour&quot;</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                           <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">to_providentia</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">only_create_wm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">wm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Horizontal methods from one grid to another one.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self : nes.Nes</span>
+<span class="sd">        Source projection Nes Object.</span>
+<span class="sd">    dst_grid : nes.Nes</span>
+<span class="sd">        Final projection Nes object.</span>
+<span class="sd">    weight_matrix_path : str, None</span>
+<span class="sd">        Path to the weight matrix to read/create.</span>
+<span class="sd">    kind : str</span>
+<span class="sd">        Kind of horizontal interpolation. Accepted values: [&quot;NearestNeighbour&quot;, &quot;Conservative&quot;].</span>
+<span class="sd">    n_neighbours : int</span>
+<span class="sd">        Used if kind == NearestNeighbour. Number of nearest neighbours to interpolate. Default: 4.</span>
+<span class="sd">    info : bool</span>
+<span class="sd">        Indicates if you want to print extra info during the methods process.</span>
+<span class="sd">    to_providentia : bool</span>
+<span class="sd">        Indicates if we want the interpolated grid in Providentia format.</span>
+<span class="sd">    only_create_wm : bool</span>
+<span class="sd">        Indicates if you want to only create the Weight Matrix.</span>
+<span class="sd">    wm : Nes</span>
+<span class="sd">        Weight matrix Nes File.</span>
+<span class="sd">    flux : bool</span>
+<span class="sd">        Indicates if you want to calculate the weight matrix for flux variables.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Creating Weight Matrix&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Obtain weight matrix</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+        <span class="n">weights</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">__get_weights_idx_t_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="p">,</span>
+                                                <span class="n">only_create_wm</span><span class="p">,</span> <span class="n">wm</span><span class="p">,</span> <span class="n">flux</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">]:</span>
+        <span class="n">weights</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">__get_weights_idx_xy_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="p">,</span>
+                                                 <span class="n">only_create_wm</span><span class="p">,</span> <span class="n">wm</span><span class="p">,</span> <span class="n">flux</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Parallel method </span><span class="si">{0}</span><span class="s2"> is not implemented yet for horizontal interpolations.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;Use &#39;T&#39;&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Weight Matrix done!&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">only_create_wm</span><span class="p">:</span>
+        <span class="c1"># weights for only_create is the WM NES object</span>
+        <span class="k">return</span> <span class="n">weights</span>
+
+    <span class="c1"># idx[idx &lt; 0] = nan</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">idx</span> <span class="o">==</span> <span class="o">-</span><span class="mi">999</span><span class="p">)</span>
+    <span class="c1"># idx = array(idx, dtype=float)</span>
+    <span class="c1"># idx[idx &lt; 0] = nan</span>
+    <span class="c1"># weights[weights &lt; 0] = nan</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">ma</span><span class="o">.</span><span class="n">masked_array</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">weights</span> <span class="o">==</span> <span class="o">-</span><span class="mi">999</span><span class="p">)</span>
+    <span class="c1"># weights = array(weights, dtype=float)</span>
+    <span class="c1"># weights[weights &lt; 0] = nan</span>
+
+    <span class="c1"># Copy NES</span>
+    <span class="n">final_dst</span> <span class="o">=</span> <span class="n">dst_grid</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">set_communicator</span><span class="p">(</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">comm</span><span class="p">)</span>
+
+    <span class="c1"># Remove original file information</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">__ini_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">netcdf</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Return final_dst</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">lev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lev</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">set_full_levels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_full_levels</span><span class="p">())</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">set_full_times</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_full_times</span><span class="p">())</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">hours_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hours_start</span>
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">hours_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hours_end</span>
+
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Applying weights&quot;</span><span class="p">)</span>
+    <span class="c1"># Apply weights</span>
+    <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">var_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{var}</span><span class="s2"> horizontal interpolation&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="o">=</span><span class="n">var_name</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">src_shape</span> <span class="o">=</span> <span class="n">var_info</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dst_grid</span><span class="p">,</span> <span class="n">nes</span><span class="o">.</span><span class="n">PointsNes</span><span class="p">):</span>
+            <span class="n">dst_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">src_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">src_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dst_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">src_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">src_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">],</span> <span class="n">idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="c1"># Creating new variable without data</span>
+        <span class="n">final_dst</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">attr_name</span><span class="p">:</span> <span class="n">attr_value</span> <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr_value</span> <span class="ow">in</span> <span class="n">var_info</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                         <span class="k">if</span> <span class="n">attr_name</span> <span class="o">!=</span> <span class="s2">&quot;data&quot;</span><span class="p">}</span>
+        <span class="c1"># Creating empty data</span>
+        <span class="n">final_dst</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">dst_shape</span><span class="p">)</span>
+
+        <span class="c1"># src_data = var_info[&quot;data&quot;].reshape((src_shape[0], src_shape[1], src_shape[2] * src_shape[3]))</span>
+        <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dst_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">for</span> <span class="n">lev</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">dst_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">src_aux</span> <span class="o">=</span> <span class="n">__get_src_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="p">,</span> <span class="n">var_info</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">time</span><span class="p">,</span> <span class="n">lev</span><span class="p">],</span> <span class="n">idx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span><span class="p">)</span>
+                <span class="n">final_dst</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">time</span><span class="p">,</span> <span class="n">lev</span><span class="p">]</span> <span class="o">=</span> <span class="n">nansum</span><span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="n">src_aux</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dst_grid</span><span class="p">,</span> <span class="n">nes</span><span class="o">.</span><span class="n">PointsNes</span><span class="p">):</span>
+            <span class="c1"># Removing level axis</span>
+            <span class="k">if</span> <span class="n">src_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Data with vertical levels cannot be interpolated to points&quot;</span><span class="p">)</span>
+            <span class="n">final_dst</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_dst</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">src_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dst_grid</span><span class="p">,</span> <span class="n">nes</span><span class="o">.</span><span class="n">PointsNesGHOST</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">to_providentia</span><span class="p">:</span>
+                <span class="n">final_dst</span> <span class="o">=</span> <span class="n">final_dst</span><span class="o">.</span><span class="n">to_points</span><span class="p">()</span>
+                
+    <span class="n">final_dst</span><span class="o">.</span><span class="n">global_attrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">global_attrs</span>
+
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Formatting&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">to_providentia</span><span class="p">:</span>
+        <span class="c1"># self = experiment to interpolate (regular, rotated, etc.)</span>
+        <span class="c1"># final_dst = interpolated experiment (points)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">final_dst</span><span class="p">,</span> <span class="n">nes</span><span class="o">.</span><span class="n">PointsNes</span><span class="p">):</span>
+            <span class="n">model_centre_lat</span><span class="p">,</span> <span class="n">model_centre_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_providentia_exp_centre_coordinates</span><span class="p">()</span>
+            <span class="n">grid_edge_lat</span><span class="p">,</span> <span class="n">grid_edge_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">create_providentia_exp_grid_edge_coordinates</span><span class="p">()</span>
+            <span class="n">final_dst</span> <span class="o">=</span> <span class="n">final_dst</span><span class="o">.</span><span class="n">to_providentia</span><span class="p">(</span><span class="n">model_centre_lon</span><span class="o">=</span><span class="n">model_centre_lon</span><span class="p">,</span> 
+                                                 <span class="n">model_centre_lat</span><span class="o">=</span><span class="n">model_centre_lat</span><span class="p">,</span>
+                                                 <span class="n">grid_edge_lon</span><span class="o">=</span><span class="n">grid_edge_lon</span><span class="p">,</span>
+                                                 <span class="n">grid_edge_lat</span><span class="o">=</span><span class="n">grid_edge_lat</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;The final projection must be points to interpolate an experiment and get it in Providentia format.&quot;</span>
+            <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Convert dimensions (time, lev, lat, lon) or (time, lat, lon) to (time, station) for interpolated variables </span>
+        <span class="c1"># and reshape data</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">final_dst</span><span class="p">,</span> <span class="n">nes</span><span class="o">.</span><span class="n">PointsNes</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">var_info</span> <span class="ow">in</span> <span class="n">final_dst</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_info</span><span class="p">[</span><span class="s2">&quot;dimensions&quot;</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_info</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+                    <span class="n">final_dst</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;dimensions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="s2">&quot;station&quot;</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">final_dst</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">__get_src_data</span><span class="p">(</span><span class="n">comm</span><span class="p">,</span> <span class="n">var_data</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">parallel_method</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To obtain the needed src data to interpolate.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    comm : MPI.Comm.</span>
+<span class="sd">        MPI communicator.</span>
+<span class="sd">    var_data : array</span>
+<span class="sd">        Rank source data.</span>
+<span class="sd">    idx : array</span>
+<span class="sd">        Index of the needed data in a 2D flatten way.</span>
+<span class="sd">    parallel_method: str</span>
+<span class="sd">        Source parallel method.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    array</span>
+<span class="sd">        Flatten source needed data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">parallel_method</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+        <span class="n">var_data</span> <span class="o">=</span> <span class="n">var_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">var_data</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">var_data</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">Get_rank</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">parallel_method</span> <span class="o">==</span> <span class="s2">&quot;Y&quot;</span><span class="p">:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">elif</span> <span class="n">parallel_method</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">parallel_method</span><span class="p">)</span>
+            <span class="n">var_data</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">(</span><span class="n">var_data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+            <span class="n">var_data</span> <span class="o">=</span> <span class="n">var_data</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="n">var_data</span> <span class="o">=</span> <span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">var_data</span><span class="p">)</span>
+
+    <span class="n">var_data</span> <span class="o">=</span> <span class="n">pad</span><span class="p">(</span><span class="n">var_data</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="s2">&quot;constant&quot;</span><span class="p">,</span> <span class="n">constant_values</span><span class="o">=</span><span class="n">nan</span><span class="p">)</span><span class="o">.</span><span class="n">take</span><span class="p">(</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;clip&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">var_data</span>
+
+
+<span class="c1"># noinspection DuplicatedCode</span>
+<span class="k">def</span> <span class="nf">__get_weights_idx_t_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="p">,</span> <span class="n">only_create</span><span class="p">,</span> <span class="n">wm</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To obtain the weights and source data index through the T axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self : nes.Nes</span>
+<span class="sd">        Source projection Nes Object.</span>
+<span class="sd">    dst_grid : nes.Nes</span>
+<span class="sd">        Final projection Nes object.</span>
+<span class="sd">    weight_matrix_path : str, None</span>
+<span class="sd">        Path to the weight matrix to read/create.</span>
+<span class="sd">    kind : str</span>
+<span class="sd">        Kind of horizontal interpolation. Accepted values: [&quot;NearestNeighbour&quot;, &quot;Conservative&quot;].</span>
+<span class="sd">    n_neighbours : int</span>
+<span class="sd">        Used if kind == NearestNeighbour. Number of nearest neighbours to interpolate. Default: 4.</span>
+<span class="sd">    only_create : bool</span>
+<span class="sd">        Indicates if you want to only create the Weight Matrix.</span>
+<span class="sd">    wm : Nes</span>
+<span class="sd">        Weight matrix Nes File.</span>
+<span class="sd">    flux : bool</span>
+<span class="sd">        Indicates if you want to calculate the weight matrix for flux variables.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        Weights and source data index.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">wm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">wm</span>
+
+    <span class="k">elif</span> <span class="n">weight_matrix_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">FileLock</span><span class="p">(</span><span class="n">weight_matrix_path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:03d}</span><span class="s2">.lock&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">weight_matrix_path</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__read_weight_matrix</span><span class="p">(</span><span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_SELF</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">NEAREST_OPTS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">lev</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span> <span class="o">!=</span> <span class="n">n_neighbours</span><span class="p">:</span>
+                            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The selected weight matrix does not have the same number of nearest neighbours.&quot;</span> <span class="o">+</span>
+                                 <span class="s2">&quot;Re-calculating again but not saving it.&quot;</span><span class="p">)</span>
+                            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                            <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_nn_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="o">=</span><span class="n">n_neighbours</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">NEAREST_OPTS</span><span class="p">:</span>
+                        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_nn_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="o">=</span><span class="n">n_neighbours</span><span class="p">,</span>
+                                                                  <span class="n">wm_path</span><span class="o">=</span><span class="n">weight_matrix_path</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">CONSERVATIVE_OPTS</span><span class="p">:</span>
+                        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_area_conservative_weight_matrix</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">wm_path</span><span class="o">=</span><span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">weight_matrix_path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:03d}</span><span class="s2">.lock&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">weight_matrix_path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:03d}</span><span class="s2">.lock&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">NEAREST_OPTS</span><span class="p">:</span>
+                <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_nn_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="o">=</span><span class="n">n_neighbours</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">CONSERVATIVE_OPTS</span><span class="p">:</span>
+                <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_area_conservative_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">only_create</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">weight_matrix</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">NEAREST_OPTS</span><span class="p">:</span>
+            <span class="c1"># Normalize to 1</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span> <span class="o">/</span>
+                            <span class="n">array</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                            <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">weights</span><span class="p">,</span> <span class="n">idx</span>
+
+
+<span class="c1"># noinspection DuplicatedCode</span>
+<span class="k">def</span> <span class="nf">__get_weights_idx_xy_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">kind</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="p">,</span> <span class="n">only_create</span><span class="p">,</span> <span class="n">wm</span><span class="p">,</span> <span class="n">flux</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To obtain the weights and source data index through the X or Y axis.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self : nes.Nes</span>
+<span class="sd">        Source projection Nes Object.</span>
+<span class="sd">    dst_grid : nes.Nes</span>
+<span class="sd">        Final projection Nes object.</span>
+<span class="sd">    weight_matrix_path : str, None</span>
+<span class="sd">        Path to the weight matrix to read/create.</span>
+<span class="sd">    kind : str</span>
+<span class="sd">        Kind of horizontal interpolation. Accepted values: [&quot;NearestNeighbour&quot;, &quot;Conservative&quot;].</span>
+<span class="sd">    n_neighbours : int</span>
+<span class="sd">        Used if kind == NearestNeighbour. Number of nearest neighbours to interpolate. Default: 4.</span>
+<span class="sd">    only_create : bool</span>
+<span class="sd">        Indicates if you want to only create the Weight Matrix.</span>
+<span class="sd">    wm : Nes</span>
+<span class="sd">        Weight matrix Nes File.</span>
+<span class="sd">    flux : bool</span>
+<span class="sd">        Indicates if you want to calculate the weight matrix for flux variables.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        Weights and source data index.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dst_grid</span><span class="p">,</span> <span class="n">nes</span><span class="o">.</span><span class="n">PointsNes</span><span class="p">)</span> <span class="ow">and</span> <span class="n">weight_matrix_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;To point weight matrix cannot be saved.&quot;</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+        <span class="n">weight_matrix_path</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">wm</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">wm</span>
+
+    <span class="k">elif</span> <span class="n">weight_matrix_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">FileLock</span><span class="p">(</span><span class="n">weight_matrix_path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:03d}</span><span class="s2">.lock&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">weight_matrix_path</span><span class="p">):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__read_weight_matrix</span><span class="p">(</span><span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_SELF</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">NEAREST_OPTS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">lev</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span> <span class="o">!=</span> <span class="n">n_neighbours</span><span class="p">:</span>
+                            <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;The selected weight matrix does not have the same number of nearest neighbours.&quot;</span> <span class="o">+</span>
+                                 <span class="s2">&quot;Re-calculating again but not saving it.&quot;</span><span class="p">)</span>
+                            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                            <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_nn_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="o">=</span><span class="n">n_neighbours</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">NEAREST_OPTS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_nn_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="o">=</span><span class="n">n_neighbours</span><span class="p">,</span>
+                                                                  <span class="n">wm_path</span><span class="o">=</span><span class="n">weight_matrix_path</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">elif</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">CONSERVATIVE_OPTS</span><span class="p">:</span>
+                    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_area_conservative_weight_matrix</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">wm_path</span><span class="o">=</span><span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">weight_matrix_path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:03d}</span><span class="s2">.lock&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">)):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">weight_matrix_path</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">{0:03d}</span><span class="s2">.lock&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">NEAREST_OPTS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_nn_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="o">=</span><span class="n">n_neighbours</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">CONSERVATIVE_OPTS</span><span class="p">:</span>
+            <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">__create_area_conservative_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="n">flux</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">only_create</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">weight_matrix</span><span class="p">,</span> <span class="kc">None</span>
+
+    <span class="c1"># Normalize to 1</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">NEAREST_OPTS</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span> <span class="o">/</span>
+                            <span class="n">array</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                            <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">weights</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int64</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">weights</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># if isinstance(dst_grid, nes.PointsNes):</span>
+    <span class="c1"># print(&quot;weights 1 -&gt;&quot;, weights.shape)</span>
+    <span class="c1"># print(&quot;idx 1 -&gt;&quot;, idx.shape)</span>
+    <span class="c1">#     weights = weights[:, dst_grid.write_axis_limits[&quot;x_min&quot;]:dst_grid.write_axis_limits[&quot;x_max&quot;]]</span>
+    <span class="c1">#     idx = idx[dst_grid.write_axis_limits[&quot;x_min&quot;]:dst_grid.write_axis_limits[&quot;x_max&quot;]]</span>
+    <span class="c1"># else:</span>
+    <span class="n">weights</span> <span class="o">=</span> <span class="n">weights</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">dst_grid</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;y_min&quot;</span><span class="p">]:</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;y_max&quot;</span><span class="p">],</span>
+                      <span class="n">dst_grid</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">]]</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[:,</span> <span class="n">dst_grid</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;y_min&quot;</span><span class="p">]:</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;y_max&quot;</span><span class="p">],</span>
+              <span class="n">dst_grid</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">]]</span>
+    <span class="c1"># print(&quot;weights 2 -&gt;&quot;, weights.shape)</span>
+    <span class="c1"># print(&quot;idx 2 -&gt;&quot;, idx.shape)</span>
+
+    <span class="k">return</span> <span class="n">weights</span><span class="p">,</span> <span class="n">idx</span>
+
+
+<span class="k">def</span> <span class="nf">__read_weight_matrix</span><span class="p">(</span><span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="s2">&quot;T&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read weight matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    weight_matrix_path : str</span>
+<span class="sd">        Path of the weight matrix.</span>
+<span class="sd">    comm : MPI.Comm</span>
+<span class="sd">        A Communicator to read the weight matrix.</span>
+<span class="sd">    parallel_method : str</span>
+<span class="sd">        Nes parallel method to read the weight matrix.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nes.Nes</span>
+<span class="sd">        Weight matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">nes</span><span class="o">.</span><span class="n">open_netcdf</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">weight_matrix_path</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">load</span><span class="p">()</span>
+
+    <span class="c1"># In previous versions of NES weight was called inverse_dists</span>
+    <span class="k">if</span> <span class="s2">&quot;inverse_dists&quot;</span> <span class="ow">in</span> <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;inverse_dists&quot;</span><span class="p">]</span>
+
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nan</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">nan</span>
+    
+    <span class="k">return</span> <span class="n">weight_matrix</span>
+
+
+<span class="c1"># noinspection DuplicatedCode,PyProtectedMember</span>
+<span class="k">def</span> <span class="nf">__create_nn_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">wm_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To create the weight matrix with the nearest neighbours method.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self : nes.Nes</span>
+<span class="sd">        Source projection Nes Object.</span>
+<span class="sd">    dst_grid : nes.Nes</span>
+<span class="sd">        Final projection Nes object.</span>
+<span class="sd">    n_neighbours : int</span>
+<span class="sd">        Used if kind == NearestNeighbour. Number of nearest neighbours to interpolate. Default: 4.</span>
+<span class="sd">    wm_path : str</span>
+<span class="sd">        Path where write the weight matrix.</span>
+<span class="sd">    info: bool</span>
+<span class="sd">        Indicates if you want to print extra info during the methods process.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nes.Nes</span>
+<span class="sd">        Weight matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Only master is here.</span>
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Creating Nearest Neighbour Weight Matrix with </span><span class="si">{0}</span><span class="s2"> neighbours&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">n_neighbours</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="c1"># Source</span>
+    <span class="n">src_lat</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">src_lon</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_full_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="c1"># 1D to 2D coordinates</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">src_lon</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">src_lon</span><span class="p">,</span> <span class="n">src_lat</span> <span class="o">=</span> <span class="n">meshgrid</span><span class="p">(</span><span class="n">src_lon</span><span class="p">,</span> <span class="n">src_lat</span><span class="p">)</span>
+
+    <span class="c1"># Destination</span>
+    <span class="n">dst_lat</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">_full_lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
+    <span class="n">dst_lon</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">_full_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float32</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dst_grid</span><span class="p">,</span> <span class="n">nes</span><span class="o">.</span><span class="n">PointsNes</span><span class="p">):</span>
+        <span class="n">dst_lat</span> <span class="o">=</span> <span class="n">expand_dims</span><span class="p">(</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">_full_lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dst_lon</span> <span class="o">=</span> <span class="n">expand_dims</span><span class="p">(</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">_full_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># 1D to 2D coordinates</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dst_lon</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dst_lon</span><span class="p">,</span> <span class="n">dst_lat</span> <span class="o">=</span> <span class="n">meshgrid</span><span class="p">(</span><span class="n">dst_lon</span><span class="p">,</span> <span class="n">dst_lat</span><span class="p">)</span>
+
+    <span class="c1"># calculate N nearest neighbour inverse distance weights (and indices)</span>
+    <span class="c1"># from gridcells centres of model 1 to each grid cell centre of model 2</span>
+    <span class="c1"># model geographic longitude/latitude coordinates are first converted</span>
+    <span class="c1"># to cartesian ECEF (Earth Centred, Earth Fixed) coordinates, before</span>
+    <span class="c1"># calculating distances.</span>
+
+    <span class="c1"># src_mod_xy = lon_lat_to_cartesian(src_lon.flatten(), src_lat.flatten())</span>
+    <span class="c1"># dst_mod_xy = lon_lat_to_cartesian(dst_lon.flatten(), dst_lat.flatten())</span>
+
+    <span class="n">src_mod_xy</span> <span class="o">=</span> <span class="n">__lon_lat_to_cartesian_ecef</span><span class="p">(</span><span class="n">src_lon</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">src_lat</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+    <span class="n">dst_mod_xy</span> <span class="o">=</span> <span class="n">__lon_lat_to_cartesian_ecef</span><span class="p">(</span><span class="n">dst_lon</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">dst_lat</span><span class="o">.</span><span class="n">flatten</span><span class="p">())</span>
+
+    <span class="c1"># generate KDtree using model 1 coordinates (i.e. the model grid you are</span>
+    <span class="c1"># interpolating from)</span>
+    <span class="n">src_tree</span> <span class="o">=</span> <span class="n">spatial</span><span class="o">.</span><span class="n">cKDTree</span><span class="p">(</span><span class="n">src_mod_xy</span><span class="p">)</span>
+
+    <span class="c1"># get n-neighbour nearest distances/indices (ravel form) of model 1 grid cell</span>
+    <span class="c1"># centres from each model 2 grid cell centre</span>
+
+    <span class="n">dists</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="n">src_tree</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">dst_mod_xy</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="n">n_neighbours</span><span class="p">)</span>
+    <span class="c1"># self.nearest_neighbour_inds = \</span>
+    <span class="c1">#     column_stack(unravel_index(idx, lon.shape))</span>
+
+    <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">dst_grid</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">_full_time</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">_full_time_bnds</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">time_bnds</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">last_level</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">first_level</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">hours_start</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">hours_end</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">set_communicator</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_SELF</span><span class="p">)</span>
+    <span class="c1"># take the reciprocals of the nearest neighbours distances</span>
+    <span class="n">dists</span><span class="p">[</span><span class="n">dists</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">inverse_dists</span> <span class="o">=</span> <span class="n">reciprocal</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
+
+    <span class="n">inverse_dists_transf</span> <span class="o">=</span> <span class="n">inverse_dists</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="p">,</span> <span class="n">dst_lon</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dst_lon</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">inverse_dists_transf</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;m&quot;</span><span class="p">}</span>
+    <span class="n">idx_transf</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_neighbours</span><span class="p">,</span> <span class="n">dst_lon</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dst_lon</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">idx_transf</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">lev</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">arange</span><span class="p">(</span><span class="n">inverse_dists_transf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
+    <span class="n">weight_matrix</span><span class="o">.</span><span class="n">_full_lev</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">arange</span><span class="p">(</span><span class="n">inverse_dists_transf</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">wm_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">wm_path</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">weight_matrix</span>
+
+
+<span class="c1"># noinspection DuplicatedCode</span>
+<span class="k">def</span> <span class="nf">__create_area_conservative_weight_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dst_nes</span><span class="p">,</span> <span class="n">wm_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">flux</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To create the weight matrix with the area conservative method.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self : nes.Nes</span>
+<span class="sd">        Source projection Nes Object.</span>
+<span class="sd">    dst_nes : nes.Nes</span>
+<span class="sd">        Final projection Nes object.</span>
+<span class="sd">    wm_path : str</span>
+<span class="sd">        Path where write the weight matrix.</span>
+<span class="sd">    flux : bool</span>
+<span class="sd">        Indicates if you want to calculate the weight matrix for flux variables.</span>
+<span class="sd">    info: bool</span>
+<span class="sd">        Indicates if you want to print extra info during the methods process.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    nes.Nes</span>
+<span class="sd">        Weight matrix.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">Creating area conservative Weight Matrix&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="n">my_crs</span> <span class="o">=</span> <span class="n">CRS</span><span class="o">.</span><span class="n">from_proj4</span><span class="p">(</span><span class="s2">&quot;+proj=latlon&quot;</span><span class="p">)</span>  <span class="c1"># Common projection for both shapefiles</span>
+
+    <span class="c1"># Get a portion of the destiny grid</span>
+    <span class="k">if</span> <span class="n">dst_nes</span><span class="o">.</span><span class="n">shapefile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dst_nes</span><span class="o">.</span><span class="n">create_shapefile</span><span class="p">()</span>
+    <span class="n">dst_grid</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">dst_nes</span><span class="o">.</span><span class="n">shapefile</span><span class="p">)</span>
+
+    <span class="c1"># Formatting Destination grid</span>
+    <span class="n">dst_grid</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">my_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dst_grid</span><span class="p">[</span><span class="s2">&quot;FID_dst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dst_grid</span><span class="o">.</span><span class="n">index</span>
+
+    <span class="c1"># Preparing Source grid</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shapefile</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_shapefile</span><span class="p">()</span>
+    <span class="n">src_grid</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shapefile</span><span class="p">)</span>
+
+    <span class="c1"># Formatting Source grid</span>
+    <span class="n">src_grid</span><span class="o">.</span><span class="n">to_crs</span><span class="p">(</span><span class="n">crs</span><span class="o">=</span><span class="n">my_crs</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Serialize index intersection function to avoid memory problems</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span> <span class="o">!=</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+        <span class="n">src_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">src_grid</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dst_grid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">dst_grid</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+            <span class="n">src_grid</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="n">src_grid</span><span class="p">)</span>
+            <span class="n">dst_grid</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="n">dst_grid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="n">src_grid</span><span class="p">[</span><span class="s2">&quot;FID_src&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_grid</span><span class="o">.</span><span class="n">index</span>
+        <span class="n">src_grid</span> <span class="o">=</span> <span class="n">src_grid</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">dst_grid</span> <span class="o">=</span> <span class="n">dst_grid</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">fid_src</span><span class="p">,</span> <span class="n">fid_dst</span> <span class="o">=</span> <span class="n">dst_grid</span><span class="o">.</span><span class="n">sindex</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">src_grid</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">predicate</span><span class="o">=</span><span class="s2">&quot;intersects&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Calculate intersected areas and fractions</span>
+        <span class="n">intersection_df</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;FID_src&quot;</span><span class="p">,</span> <span class="s2">&quot;FID_dst&quot;</span><span class="p">])</span>
+
+        <span class="n">intersection_df</span><span class="p">[</span><span class="s2">&quot;FID_src&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">src_grid</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fid_src</span><span class="p">,</span> <span class="s2">&quot;FID_src&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">uint32</span><span class="p">)</span>
+        <span class="n">intersection_df</span><span class="p">[</span><span class="s2">&quot;FID_dst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">dst_grid</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fid_dst</span><span class="p">,</span> <span class="s2">&quot;FID_dst&quot;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">uint32</span><span class="p">)</span>
+
+        <span class="n">intersection_df</span><span class="p">[</span><span class="s2">&quot;geometry_src&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">src_grid</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fid_src</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">intersection_df</span><span class="p">[</span><span class="s2">&quot;geometry_dst&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dst_grid</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">fid_dst</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="k">del</span> <span class="n">src_grid</span><span class="p">,</span> <span class="n">dst_grid</span><span class="p">,</span> <span class="n">fid_src</span><span class="p">,</span> <span class="n">fid_dst</span>
+        <span class="c1"># Split the array into smaller arrays in order to scatter the data among the processes</span>
+        <span class="n">intersection_df</span> <span class="o">=</span> <span class="n">array_split</span><span class="p">(</span><span class="n">intersection_df</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">intersection_df</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">intersection_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">intersection_df</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Grids created and ready to interpolate&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+    <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># No Warnings Zone</span>
+        <span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">)</span>
+        <span class="c1"># intersection_df[&quot;weight&quot;] = array(intersection_df.apply(</span>
+        <span class="c1">#     lambda x: x[&quot;geometry_src&quot;].intersection(x[&quot;geometry_dst&quot;]).buffer(0).area / x[&quot;geometry_src&quot;].area,</span>
+        <span class="c1">#     axis=1), dtype=float64)</span>
+        <span class="k">if</span> <span class="n">flux</span><span class="p">:</span>
+            <span class="n">intersection_df</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">intersection_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;geometry_src&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;geometry_dst&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">area</span> <span class="o">/</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;geometry_src&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">area</span><span class="p">)</span> <span class="o">*</span>
+                          <span class="p">(</span><span class="n">nes</span><span class="o">.</span><span class="n">Nes</span><span class="o">.</span><span class="n">calculate_geometry_area</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;geometry_src&quot;</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span>
+                           <span class="n">nes</span><span class="o">.</span><span class="n">Nes</span><span class="o">.</span><span class="n">calculate_geometry_area</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;geometry_dst&quot;</span><span class="p">]])[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">intersection_df</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">intersection_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;geometry_src&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">&quot;geometry_dst&quot;</span><span class="p">])</span><span class="o">.</span><span class="n">buffer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">area</span> <span class="o">/</span> <span class="n">x</span><span class="p">[</span><span class="s2">&quot;geometry_src&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">area</span><span class="p">,</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="n">intersection_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;geometry_src&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry_dst&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+        <span class="n">filterwarnings</span><span class="p">(</span><span class="s2">&quot;default&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Format &amp; Clean</span>
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Weights calculated. Formatting weight matrix.&quot;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="c1"># Initialising weight matrix</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span> <span class="o">!=</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+        <span class="n">intersection_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">intersection_df</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span> <span class="o">!=</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+            <span class="n">intersection_df</span> <span class="o">=</span> <span class="n">concat</span><span class="p">(</span><span class="n">intersection_df</span><span class="p">)</span>
+        <span class="n">intersection_df</span> <span class="o">=</span> <span class="n">intersection_df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;FID_dst&quot;</span><span class="p">,</span> <span class="n">intersection_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;FID_dst&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cumcount</span><span class="p">()])</span><span class="o">.</span><span class="n">rename_axis</span><span class="p">((</span><span class="s2">&quot;FID&quot;</span><span class="p">,</span> <span class="s2">&quot;level&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+        <span class="n">intersection_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;FID_src&quot;</span><span class="p">:</span> <span class="s2">&quot;idx&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="n">dst_nes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">_full_time</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="p">(</span><span class="n">year</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">month</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">day</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">hour</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">second</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">microsecond</span><span class="o">=</span><span class="mi">0</span><span class="p">)]</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">_full_time_bnds</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">time_bnds</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">last_level</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">first_level</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">hours_start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">hours_end</span> <span class="o">=</span> <span class="mi">0</span>
+    
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">set_communicator</span><span class="p">(</span><span class="n">MPI</span><span class="o">.</span><span class="n">COMM_SELF</span><span class="p">)</span>
+    
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">set_levels</span><span class="p">({</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">arange</span><span class="p">(</span><span class="n">intersection_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;level&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+                                  <span class="s2">&quot;dimensions&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;lev&quot;</span><span class="p">,),</span>
+                                  <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+                                  <span class="s2">&quot;positive&quot;</span><span class="p">:</span> <span class="s2">&quot;up&quot;</span><span class="p">})</span>
+    
+        <span class="c1"># Creating Weight matrix empty variables</span>
+        <span class="n">wm_shape</span> <span class="o">=</span> <span class="n">weight_matrix</span><span class="o">.</span><span class="n">get_full_shape</span><span class="p">()</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">lev</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]),</span> <span class="n">wm_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">wm_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],)</span>
+        <span class="n">shape_flat</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">weight_matrix</span><span class="o">.</span><span class="n">lev</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]),</span> <span class="n">wm_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">wm_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],)</span>
+    
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">empty</span><span class="p">(</span><span class="n">shape_flat</span><span class="p">),</span> <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">}</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">empty</span><span class="p">(</span><span class="n">shape_flat</span><span class="p">),</span> <span class="s2">&quot;units&quot;</span><span class="p">:</span> <span class="s2">&quot;-&quot;</span><span class="p">}</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][:]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">999</span>
+    
+        <span class="c1"># Filling Weight matrix variables</span>
+        <span class="k">for</span> <span class="n">aux_lev</span> <span class="ow">in</span> <span class="n">weight_matrix</span><span class="o">.</span><span class="n">lev</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]:</span>
+            <span class="n">aux_data</span> <span class="o">=</span> <span class="n">intersection_df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s2">&quot;level&quot;</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">aux_lev</span><span class="p">)</span>
+            <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="n">aux_lev</span><span class="p">,</span> <span class="n">aux_data</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;weight&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="n">aux_lev</span><span class="p">,</span> <span class="n">aux_data</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux_data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="s2">&quot;idx&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="c1"># Re-shaping</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;weight&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">weight_matrix</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;idx&quot;</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">wm_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="s2">Weight matrix saved at </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wm_path</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">weight_matrix</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">wm_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">weight_matrix</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">weight_matrix</span>
+
+
+<span class="c1"># noinspection DuplicatedCode</span>
+<span class="k">def</span> <span class="nf">__lon_lat_to_cartesian</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mf">6378137.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate lon, lat coordinates of a point on a sphere.</span>
+
+<span class="sd">    DEPRECATED!!!!</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lon : array</span>
+<span class="sd">        Longitude values.</span>
+<span class="sd">    lat : array</span>
+<span class="sd">        Latitude values.</span>
+<span class="sd">    radius : float</span>
+<span class="sd">        Radius of the sphere to get the distances.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lon_r</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">lat_r</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat_r</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon_r</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat_r</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon_r</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">radius</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat_r</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+
+
+<span class="k">def</span> <span class="nf">__lon_lat_to_cartesian_ecef</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert observational/model geographic longitude/latitude coordinates to cartesian ECEF (Earth Centred,</span>
+<span class="sd">    Earth Fixed) coordinates, assuming WGS84 datum and ellipsoid, and that all heights = 0.</span>
+<span class="sd">    ECEF coordinates represent positions (in meters) as X, Y, Z coordinates, approximating the earth surface</span>
+<span class="sd">    as an ellipsoid of revolution.</span>
+<span class="sd">    This conversion is for the subsequent calculation of Euclidean distances of the model grid cell centres</span>
+<span class="sd">    from each observational station.</span>
+<span class="sd">    Defining the distance between two points on the earth&#39;s surface as simply the Euclidean distance</span>
+<span class="sd">    between the two lat/lon pairs could lead to inaccurate results depending on the distance</span>
+<span class="sd">    between two points (i.e. 1 deg. of longitude varies with latitude).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lon : array</span>
+<span class="sd">        Longitude values.</span>
+<span class="sd">    lat : array</span>
+<span class="sd">        Latitude values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">lla</span> <span class="o">=</span> <span class="n">Proj</span><span class="p">(</span><span class="n">proj</span><span class="o">=</span><span class="s2">&quot;latlong&quot;</span><span class="p">,</span> <span class="n">ellps</span><span class="o">=</span><span class="s2">&quot;WGS84&quot;</span><span class="p">,</span> <span class="n">datum</span><span class="o">=</span><span class="s2">&quot;WGS84&quot;</span><span class="p">)</span>
+    <span class="n">ecef</span> <span class="o">=</span> <span class="n">Proj</span><span class="p">(</span><span class="n">proj</span><span class="o">=</span><span class="s2">&quot;geocent&quot;</span><span class="p">,</span> <span class="n">ellps</span><span class="o">=</span><span class="s2">&quot;WGS84&quot;</span><span class="p">,</span> <span class="n">datum</span><span class="o">=</span><span class="s2">&quot;WGS84&quot;</span><span class="p">)</span>
+
+    <span class="c1"># x, y, z = pyproj.transform(lla, ecef, lon, lat, zeros(lon.shape), radians=False)</span>
+    <span class="c1"># Deprecated: https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrading-to-pyproj-2-from-pyproj-1</span>
+    <span class="n">transformer</span> <span class="o">=</span> <span class="n">Transformer</span><span class="o">.</span><span class="n">from_proj</span><span class="p">(</span><span class="n">lla</span><span class="p">,</span> <span class="n">ecef</span><span class="p">)</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="n">transformer</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">zeros</span><span class="p">(</span><span class="n">lon</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">radians</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Carles Tena Medina, Alba Vilanova Cortezon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

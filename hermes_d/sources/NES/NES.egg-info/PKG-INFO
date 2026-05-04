@@ -1,0 +1,65 @@
+Metadata-Version: 2.4
+Name: NES
+Version: 1.2.3
+Summary: NES (NetCDF for Earth Science) is a library designed to operate, read, and write NetCDF datasets in a parallel and efficient yet transparent way for the user, using domain decomposition as the parallelization strategy with customizable axis splitting.
+Home-page: https://earth.bsc.es/gitlab/es/nes
+Author: Carles Tena Medina, Alba Vilanova Cortezón, Carmen Piñero Megías
+Author-email: carles.tena@bsc.es, alba.vilanova@bsc.es, carmen.pinero@bsc.es
+License: Apache License 2.0
+Keywords: Python,NetCDF4,Grib2,Earth
+Classifier: Programming Language :: Python :: 3.7
+Classifier: Operating System :: OS Independent
+Classifier: Topic :: Scientific/Engineering :: Atmospheric Science
+Classifier: Intended Audience :: Science/Research
+Classifier: Natural Language :: English
+Requires-Python: >=3.7
+Description-Content-Type: text/markdown
+License-File: LICENSE.rst
+Requires-Dist: geopandas
+Requires-Dist: rtree>=0.9.0
+Requires-Dist: pandas
+Requires-Dist: netcdf4
+Requires-Dist: numpy
+Requires-Dist: pyproj
+Requires-Dist: setuptools
+Requires-Dist: scipy
+Requires-Dist: filelock
+Requires-Dist: eccodes
+Requires-Dist: mpi4py
+Requires-Dist: shapely
+Requires-Dist: python-dateutil
+Dynamic: author
+Dynamic: author-email
+Dynamic: classifier
+Dynamic: description
+Dynamic: description-content-type
+Dynamic: home-page
+Dynamic: keywords
+Dynamic: license
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary
+
+.. image:: https://earth.bsc.es/gitlab/es/nes/-/badges/release.svg?key_text=Latest+release&value_width=80
+   :target: https://earth.bsc.es/gitlab/es/nes/-/tags
+   :alt: Latest release
+
+About
+=====
+
+NES (NetCDF for Earth Science) is the Python I/O library used by SNES, the framework that implements the data post-processing pipelines at the Earth Sciences department, to read and write netCDF files.  [oai_citation:0‡README.md](sediment://file_00000000aa6c7246a0caf7519dd48944)
+
+How to install
+==============
+
+Use the following command to install the library::
+
+   pip install nes
+
+Read the `FAQ <https://earth.bsc.es/gitlab/es/nes/-/wikis/faq>`_ if you encounter any problems. If they do not resolve your issues, please contact the developers.  [oai_citation:1‡README.md](sediment://file_00000000aa6c7246a0caf7519dd48944)
+
+How to run
+==========
+
+To run the library, please follow the instruction in the `wiki <https://earth.bsc.es/gitlab/es/nes/-/wikis/home>`_.  [oai_citation:2‡README.md](sediment://file_00000000aa6c7246a0caf7519dd48944)

@@ -1,0 +1,8 @@
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore::DeprecationWarning:pyogrio",
+    "ignore:Geometry is in a geographic CRS:UserWarning:geopandas",
+    "ignore:.*DataFrame.swapaxes.*:FutureWarning",
+]
+[tool.ruff]
+line-length = 120
