@@ -1,0 +1,43 @@
+cff-version: 1.2.0
+message: "If you use HERMES_Δ in your research, please cite the software as follows."
+title: "HERMES_Δ: High-Elective Resolution Modelling Emission System – Delta"
+version: 1.0.1
+doi: 10.82201/5DVMYR
+date-released: 2026-02-18
+license: GPL-3.0
+repository-code: https://github.com/BSC-ES/HERMES_Delta
+url: https://doi.org/10.82201/5DVMYR
+
+authors:
+  - family-names: Tena
+    given-names: Carles
+    affiliation: Barcelona Supercomputing Center (BSC-CNS)
+    website: https://www.bsc.es/tena-carles
+    orcid: https://orcid.org/0000-0002-5768-6758
+
+  - family-names: Gehlen
+    given-names: Johanna
+    affiliation: Barcelona Supercomputing Center (BSC-CNS)
+    website: https://www.bsc.es/gehlen-johanna
+    orcid: https://orcid.org/0009-0000-8323-9997
+
+  - family-names: Rizza
+    given-names: Luca
+    affiliation: Barcelona Supercomputing Center (BSC-CNS)
+    website: https://www.bsc.es/es/rizza-luca
+    orcid: https://orcid.org/0009-0009-5105-9129
+
+  - family-names: Guevara
+    given-names: Marc
+    affiliation: Barcelona Supercomputing Center (BSC-CNS)
+    website: https://www.bsc.es/guevara-marc
+    orcid: https://orcid.org/0000-0001-9727-8583
+
+keywords:
+  - emission modelling
+  - emission inventories
+  - atmospheric chemistry
+  - air quality modelling
+  - chemical transport models
+  - HPC
+  - MPI

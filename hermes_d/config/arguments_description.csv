@@ -1,0 +1,59 @@
+Parameter,Description,Data Type,Required,Choices,Default
+log_level,"Level of detail of the running process information.",int,False,1;2;3;5,1
+input_dir,"Path to the input directory of the model.",str,True,None,None
+data_path,"Path to the data necessary for the model.",str,True,None,None
+output_dir,"Path to the output directory of the model.",str,True,None,None
+output_name,"Name of the output file. Use <YYYYMMDD> to insert the simulation date.",str,True,None,None
+start_date,"Starting Date to simulate (UTC)",parse_start_date,True,None,None
+end_date,"If you want to simulate more than one day you have to specify the ending date of simulation in this parameter. If it is not set end_date = start_date.",str,False,None,None
+output_timestep_type,"Type of time aggregation for outputs. Defines the resolution of emission data.",str,True,hourly;daily;monthly;yearly,None
+output_timestep_num,"Total number of time steps to simulate.",int,True,None,None
+output_timestep_freq,"Interval (in time steps) between consecutive outputs.",int,True,None,None
+first_time,"If True, the model will only create auxiliary files without running the simulation.",parse_bool,False,None,False
+erase_auxiliary_files,"Delete all previously generated auxiliary files before simulation starts.",parse_bool,False,None,False
+output_model,"Name of the output model. (default: 'DEFAULT')",str,False,MONARCH;CMAQ;WRF_CHEM;DEFAULT;MOCAGE;CHIMERE,'DEFAULT'
+compression_level,"Compression level of the NetCDF output (0 for no compressed output).",int,False,0;1;2;3;4;5;6;7;8;9,0
+serial_write,"Indicates if you want to do the writing in serial mode (faster but more memory used).",parse_bool,False,None,True
+output_attributes,"Path to the file that contains the global attributes.",str,False,None,None
+domain_type,"Type of domain to simulate.",str,True,global;lcc;rotated;mercator;regular;rotated_nested,None
+domain_name,"Domain's name",str,False,None,None
+auxiliary_files_path,"Path to the directory where the necessary auxiliary files will be created if they are not created yet.",str,True,None,None
+only_horizontal,"Skip temporal and vertical allocation; only horizontal distribution will be performed.",parse_bool,False,None,False
+vertical_description,"Comma-separated list of vertical layer upper limits.",parse_float_list,True,None,None
+inc_lat,"Grid spacing in latitude (degrees).",float,False,None,None
+inc_lon,"Grid spacing in longitude (degrees).",float,False,None,None
+lat_orig,"Latitude of the corner of the first cell.",float,False,None,None
+lon_orig,"Longitude of the corner of the first cell.",float,False,None,None
+n_lat,"Number of latitude elements.",int,False,None,None
+n_lon,"Number of longitude elements.",int,False,None,None
+centre_lat,"Central geographic latitude of grid (non-rotated degrees). Corresponds to the TPH0D parameter in NMMB-MONARCH.",float,False,None,None
+centre_lon,"Central geographic longitude of grid (non-rotated degrees and positive east). Corresponds to the TLM0D parameter in NMMB-MONARCH.",float,False,None,None
+west_boundary,"Grid's western boundary from center point (rotated degrees). Corresponds to the WBD parameter in NMMB-MONARCH.",float,False,None,None
+south_boundary,"Grid's southern boundary from center point (rotated degrees). Corresponds to the SBD parameter in NMMB-MONARCH.",float,False,None,None
+inc_rlat,"Latitudinal grid resolution (rotated degrees). Corresponds to the DPHD parameter in NMMB-MONARCH.",float,False,None,None
+inc_rlon,"Longitudinal grid resolution (rotated degrees). Corresponds to the DLMD parameter in NMMB-MONARCH.",float,False,None,None
+parent_grid_path,"Path to the netCDF that contains the grid definition.",str,False,None,None
+parent_ratio,"Ratio between the parent and the nested domain.",int,False,None,None
+i_parent_start,"Location of the I to start the nested.",int,False,None,None
+j_parent_start,"Location of the J to start the nested.",int,False,None,None
+n_rlat,"Number of rotated latitude points.",int,False,None,None
+n_rlon,"Number of rotated longitude points.",int,False,None,None
+lat_1,"Standard parallel 1 (in deg). Corresponds to the P_ALP parameter of the GRIDDESC file.",float,False,None,None
+lat_2,"Standard parallel 2 (in deg). Corresponds to the P_BET parameter of the GRIDDESC file.",float,False,None,None
+lon_0,"Longitude of the central meridian (degrees). Corresponds to the P_GAM parameter of the GRIDDESC file.",float,False,None,None
+lat_0,"Latitude of the origin of the projection (degrees). Corresponds to the Y_CENT parameter of the GRIDDESC file.",float,False,None,None
+nx,"Number of grid columns. Corresponds to the NCOLS parameter of the GRIDDESC file.",int,False,None,None
+ny,"Number of grid rows. Corresponds to the NROWS parameter of the GRIDDESC file.",int,False,None,None
+inc_x,"X-coordinate cell dimension (meters). Corresponds to the XCELL parameter of the GRIDDESC file.",float,False,None,None
+inc_y,"Y-coordinate cell dimension (meters).Corresponds to the YCELL parameter of the GRIDDESC file.",float,False,None,None
+x_0,"X-coordinate origin of grid (meters). Corresponds to the XORIG parameter of the GRIDDESC file.",float,False,None,None
+y_0,"Y-coordinate origin of grid (meters). Corresponds to the YORIG parameter of the GRIDDESC file.",float,False,None,None
+lat_ts,"Latitude where scale distortion is minimized in the Mercator projection.",float,False,None,None
+individual_speciation_file,"Path to the csv file that contains the information of convertion between individual pollutants and chemical mechanism species.",str,False,None,None
+clipping,"To clip the domain into an specific zone. It can be a shapefile path or a list of points to make a polygon or nothing to use the default clip: domain extension",str,False,None,None
+sector_information,"Path to the YAML file that contains the information of the datasets to use.",str,True,None,None
+nuts2_shapefile,"Path to the shapefile that contain the NUT2 information.",str,True,None,None
+nuts2_info,"Path to the yaml file that contains the timezone and the holidays code for each NUTS2 region.",str,True,None,None
+holidays,"Indicates if you want to take into account regional (NUTS2) holidays as Sundays.",parse_bool,False,None,False
+consistency_SEI,"Indicates if you want to apply a consistency scaling factor is SEIE emissions are lower that LPS/PRTR ones.",parse_bool,False,None,True
+daily_consistency,"Indicates if you want to raise an error if daily profiles don't match the number of days in the year (due to leap years).",parse_bool,False,None,False
