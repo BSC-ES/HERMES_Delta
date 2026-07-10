@@ -143,8 +143,8 @@ How to Cite
 
 If you use **HERMES_Δ** in your research, please cite the software release:
 
-Tena, C. (2026).
-HERMES_Δ v1 – High-Elective Resolution Modelling Emission System – Delta.
+Tena, C., Gehlen, J., Rizza, L., & Guevara, M. (2026). 
+HERMES_Δ: High-Elective Resolution Modelling Emission System – Delta (Version 1.0.1)
 Barcelona Supercomputing Center (BSC).
 https://doi.org/10.82201/5DVMYR
 
