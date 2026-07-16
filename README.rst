@@ -140,13 +140,12 @@ See the `LICENSE <https://github.com/BSC-ES/HERMES_Delta/blob/production/LICENSE
 
 How to Cite
 -----------
+If you use **HERMES_Δ** in your research, please cite the software release::
 
-If you use **HERMES_Δ** in your research, please cite the software release:
-
-Tena, C., Gehlen, J., Rizza, L., & Guevara, M. (2026). 
-HERMES_Δ: High-Elective Resolution Modelling Emission System – Delta (Version 1.0.1)
-Barcelona Supercomputing Center (BSC).
-https://doi.org/10.82201/5DVMYR
+   Tena Medina, C., Gehlen, J., Rizza, L., & Guevara, M. (2026).
+   HERMES_Δ: High-Elective Resolution Modelling Emission System – Delta (Version v1.0.1)
+   [Computer software]. Zenodo.
+   https://doi.org/10.5281/zenodo.21393948
 
 A scientific paper describing the methodology and benchmarking of HERMES_Δ is currently in preparation.
 
