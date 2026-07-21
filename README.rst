@@ -2,7 +2,7 @@
 HERMES_Δ
 ============
 
-.. image:: https://img.shields.io/badge/DOI-10.82201%2F5DVMYR-blue
+.. image:: https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21393948-blue
    :target: https://doi.org/10.82201/5DVMYR
    :alt: DOI
 
