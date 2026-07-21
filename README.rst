@@ -177,10 +177,10 @@ The development team acknowledges support from:
 Related Resources
 -----------------
 
-* Software DOI: https://doi.org/10.82201/5DVMYR
+* Software DOI: https://doi.org/10.5281/zenodo.21393948
 * Source code: https://github.com/BSC-ES/HERMES_Delta
 * Documentation: https://github.com/BSC-ES/HERMES_Delta/wiki
-* Benchmark data: https://dataverse.bsc.es/dataset.xhtml?persistentId=perma:BSC/3ST00L
+* Benchmark data: https://doi.org/10.5281/zenodo.21471814
 
 ----
 
