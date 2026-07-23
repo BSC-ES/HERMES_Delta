@@ -3,7 +3,7 @@ HERMES_Δ
 ============
 
 .. image:: https://img.shields.io/badge/DOI-10.5281%2Fzenodo.21393948-blue
-   :target: https://doi.org/10.82201/5DVMYR
+   :target: https://doi.org/10.5281/zenodo.21393948
    :alt: DOI
 
 .. image:: https://img.shields.io/badge/license-GPLv3-blue.svg
@@ -106,6 +106,7 @@ Running HERMES_Δ
 The system is run from the command line with a configuration file:
 
 .. code-block:: bash
+
     hermes_delta --my-config /path/to/your_config.ini
 
 
@@ -140,14 +141,20 @@ See the `LICENSE <https://github.com/BSC-ES/HERMES_Delta/blob/production/LICENSE
 
 How to Cite
 -----------
-If you use **HERMES_Δ** in your research, please cite the software release::
+
+If you use **HERMES_Δ** in your research, please cite the following software release:
 
    Tena Medina, C., Gehlen, J., Rizza, L., & Guevara, M. (2026).
    HERMES_Δ: High-Elective Resolution Modelling Emission System – Delta (Version v1.0.1)
    [Computer software]. Zenodo.
    https://doi.org/10.5281/zenodo.21393948
 
-A scientific paper describing the methodology and benchmarking of HERMES_Δ is currently in preparation.
+and the following scientific paper:
+
+   Guevara, M., Tena, C., Camps, P., Oliveira, K., Gehlen, J., Albarracin, A., Castesana, P., Collado, O., Herrero, L., Legarreta, O., Lombardich, I., Piñero-Megías, C., Rizza, L., Slater, J., Viñas, A., Macchia, F., Montane, G., Jorba, O., and Pérez García-Pando, C. (2026)
+   HERMES_Δ v1.0.1: an open-source emission processor for translating official air pollutant and greenhouse gas inventories into model-ready emissions, 
+   EGUsphere [preprint], 
+   https://doi.org/10.5194/egusphere-2026-4146, 2026.
 
 ----
 
@@ -178,6 +185,7 @@ Related Resources
 -----------------
 
 * Software DOI: https://doi.org/10.5281/zenodo.21393948
+* Scientific paper DOI: https://doi.org/10.5194/egusphere-2026-4146
 * Source code: https://github.com/BSC-ES/HERMES_Delta
 * Documentation: https://github.com/BSC-ES/HERMES_Delta/wiki
 * Benchmark data: https://doi.org/10.5281/zenodo.21471814
