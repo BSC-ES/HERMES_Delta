@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nes.nc_projections.points_nes_providentia &mdash; nes 1.1.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=df104e6e"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            nes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../object.html">The NES object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../methods.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../formats.html">Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../projections.html">Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">nes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nes.nc_projections.points_nes_providentia</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nes.nc_projections.points_nes_providentia</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">generic</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">issubdtype</span><span class="p">,</span> <span class="n">character</span><span class="p">,</span> <span class="n">concatenate</span>
+<span class="kn">from</span> <span class="nn">.points_nes</span> <span class="kn">import</span> <span class="n">PointsNes</span>
+
+
+<div class="viewcode-block" id="PointsNesProvidentia">
+<a class="viewcode-back" href="../../../projections.html#nes.nc_projections.points_nes_providentia.PointsNesProvidentia">[docs]</a>
+<span class="k">class</span> <span class="nc">PointsNesProvidentia</span><span class="p">(</span><span class="n">PointsNes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    _model_centre_lon : dict</span>
+<span class="sd">        Model centre longitudes dictionary with the complete &quot;data&quot; key for all the values and the rest of the </span>
+<span class="sd">        attributes.</span>
+<span class="sd">    _model_centre_lat : dict</span>
+<span class="sd">        Model centre latitudes dictionary with the complete &quot;data&quot; key for all the values and the rest of the </span>
+<span class="sd">        attributes.</span>
+<span class="sd">    _grid_edge_lon : dict </span>
+<span class="sd">        Grid edge longitudes dictionary with the complete &quot;data&quot; key for all the values and the rest of the </span>
+<span class="sd">        attributes.</span>
+<span class="sd">    _grid_edge_lat : dict </span>
+<span class="sd">        Grid edge latitudes dictionary with the complete &quot;data&quot; key for all the values and the rest of the </span>
+<span class="sd">        attributes.</span>
+<span class="sd">    model_centre_lon : dict</span>
+<span class="sd">        Model centre longitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">    model_centre_lat : dict</span>
+<span class="sd">        Model centre latitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">    grid_edge_lon : dict </span>
+<span class="sd">        Grid edge longitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">    grid_edge_lat : dict </span>
+<span class="sd">        Grid edge latitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>
+                 <span class="n">avoid_first_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">first_level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create_nes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">balanced</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_centre_lon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_centre_lat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid_edge_lon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">grid_edge_lat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the PointsNesProvidentia class</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        comm: MPI.COMM</span>
+<span class="sd">            MPI Communicator.</span>
+<span class="sd">        path: str</span>
+<span class="sd">            Path to the NetCDF to initialize the object.</span>
+<span class="sd">        info: bool</span>
+<span class="sd">            Indicates if you want to get reading/writing info.</span>
+<span class="sd">        dataset: Dataset</span>
+<span class="sd">            NetCDF4-python Dataset to initialize the class.</span>
+<span class="sd">        parallel_method : str</span>
+<span class="sd">            Indicates the parallelization method that you want. Default: &quot;X&quot;.</span>
+<span class="sd">            Accepted values: [&quot;X&quot;].</span>
+<span class="sd">        avoid_first_hours : int</span>
+<span class="sd">            Number of hours to remove from first time steps.</span>
+<span class="sd">        avoid_last_hours : int</span>
+<span class="sd">            Number of hours to remove from last time steps.</span>
+<span class="sd">        first_level : int</span>
+<span class="sd">            Index of the first level to use.</span>
+<span class="sd">        last_level : int, None</span>
+<span class="sd">            Index of the last level to use. None if it is the last.</span>
+<span class="sd">        create_nes : bool</span>
+<span class="sd">            Indicates if you want to create the object from scratch (True) or through an existing file.</span>
+<span class="sd">        balanced : bool</span>
+<span class="sd">            Indicates if you want a balanced parallelization or not. </span>
+<span class="sd">            Balanced dataset cannot be written in chunking mode.</span>
+<span class="sd">        times : list, None</span>
+<span class="sd">            List of times to substitute the current ones while creation.</span>
+<span class="sd">        model_centre_lon : dict</span>
+<span class="sd">            Model centre longitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">        model_centre_lat : dict</span>
+<span class="sd">            Model centre latitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">        grid_edge_lon : dict </span>
+<span class="sd">            Grid edge longitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">        grid_edge_lat : dict </span>
+<span class="sd">            Grid edge latitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">PointsNesProvidentia</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+                                                   <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span>
+                                                   <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span> 
+                                                   <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span>
+                                                   <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span> 
+                                                   <span class="n">create_nes</span><span class="o">=</span><span class="n">create_nes</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">create_nes</span><span class="p">:</span>
+            <span class="c1"># Complete dimensions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lon</span> <span class="o">=</span> <span class="n">model_centre_lon</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lat</span> <span class="o">=</span> <span class="n">model_centre_lat</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_grid_edge_lon</span> <span class="o">=</span> <span class="n">grid_edge_lon</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_grid_edge_lat</span> <span class="o">=</span> <span class="n">grid_edge_lat</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Complete dimensions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_dimension</span><span class="p">([</span><span class="s2">&quot;model_centre_longitude&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_dimension</span><span class="p">([</span><span class="s2">&quot;model_centre_latitude&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_grid_edge_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_dimension</span><span class="p">([</span><span class="s2">&quot;grid_edge_longitude&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_grid_edge_lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_dimension</span><span class="p">([</span><span class="s2">&quot;grid_edge_latitude&quot;</span><span class="p">])</span>
+        
+        <span class="c1"># Dimensions screening</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_centre_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lon</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_centre_lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lat</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_edge_lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_edge_lon</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">grid_edge_lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_edge_lat</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> 
+
+<div class="viewcode-block" id="PointsNesProvidentia.new">
+<a class="viewcode-back" href="../../../projections.html#nes.nc_projections.points_nes_providentia.PointsNesProvidentia.new">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="s2">&quot;X&quot;</span><span class="p">,</span>
+            <span class="n">avoid_first_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">first_level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">create_nes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">model_centre_lon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">model_centre_lat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid_edge_lon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">grid_edge_lat</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the PointsNesProvidentia class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        comm: MPI.COMM</span>
+<span class="sd">            MPI Communicator.</span>
+<span class="sd">        path: str</span>
+<span class="sd">            Path to the NetCDF to initialize the object.</span>
+<span class="sd">        info: bool</span>
+<span class="sd">            Indicates if you want to get reading/writing info.</span>
+<span class="sd">        dataset: Dataset</span>
+<span class="sd">            NetCDF4-python Dataset to initialize the class.</span>
+<span class="sd">        parallel_method : str</span>
+<span class="sd">            Indicates the parallelization method that you want. Default: &quot;X&quot;.</span>
+<span class="sd">            Accepted values: [&quot;X&quot;].</span>
+<span class="sd">        avoid_first_hours : int</span>
+<span class="sd">            Number of hours to remove from first time steps.</span>
+<span class="sd">        avoid_last_hours : int</span>
+<span class="sd">            Number of hours to remove from last time steps.</span>
+<span class="sd">        first_level : int</span>
+<span class="sd">            Index of the first level to use</span>
+<span class="sd">        last_level : int, None</span>
+<span class="sd">            Index of the last level to use. None if it is the last.</span>
+<span class="sd">        balanced : bool</span>
+<span class="sd">            Indicates if you want a balanced parallelization or not. </span>
+<span class="sd">            Balanced dataset cannot be written in chunking mode.</span>
+<span class="sd">        times : list, None</span>
+<span class="sd">            List of times to substitute the current ones while creation.</span>
+<span class="sd">        create_nes : bool</span>
+<span class="sd">            Indicates if you want to create the object from scratch (True) or through an existing file.</span>
+<span class="sd">        model_centre_lon : dict</span>
+<span class="sd">            Model centre longitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">        model_centre_lat : dict</span>
+<span class="sd">            Model centre latitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">        grid_edge_lon : dict </span>
+<span class="sd">            Grid edge longitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">        grid_edge_lat : dict </span>
+<span class="sd">            Grid edge latitudes dictionary with the portion of &quot;data&quot; corresponding to the rank values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">new</span> <span class="o">=</span> <span class="n">PointsNesProvidentia</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+                                   <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span> <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span>
+                                   <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span> <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span>
+                                   <span class="n">create_nes</span><span class="o">=</span><span class="n">create_nes</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span>
+                                   <span class="n">model_centre_lon</span><span class="o">=</span><span class="n">model_centre_lon</span><span class="p">,</span> <span class="n">model_centre_lat</span><span class="o">=</span><span class="n">model_centre_lat</span><span class="p">,</span>
+                                   <span class="n">grid_edge_lon</span><span class="o">=</span><span class="n">grid_edge_lon</span><span class="p">,</span> <span class="n">grid_edge_lat</span><span class="o">=</span><span class="n">grid_edge_lat</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new</span></div>
+
+
+    <span class="k">def</span> <span class="nf">_create_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">netcdf</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create &quot;grid_edge&quot;, &quot;model_latitude&quot; and &quot;model_longitude&quot; dimensions and the super dimensions</span>
+<span class="sd">        &quot;time&quot;, &quot;time_nv&quot;, &quot;station&quot;, and &quot;strlen&quot;.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        netcdf : Dataset</span>
+<span class="sd">            NetCDF object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">PointsNesProvidentia</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_create_dimensions</span><span class="p">(</span><span class="n">netcdf</span><span class="p">)</span>
+        
+        <span class="c1"># Create grid_edge, model_latitude and model_longitude dimensions</span>
+        <span class="n">netcdf</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s2">&quot;grid_edge&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid_edge_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]))</span>
+        <span class="n">netcdf</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s2">&quot;model_latitude&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">netcdf</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s2">&quot;model_longitude&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_create_dimension_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">netcdf</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the &quot;model_centre_lon&quot;, model_centre_lat&quot;, &quot;grid_edge_lon&quot; and &quot;grid_edge_lat&quot; variables.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        netcdf : Dataset</span>
+<span class="sd">            NetCDF object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">PointsNesProvidentia</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_create_dimension_variables</span><span class="p">(</span><span class="n">netcdf</span><span class="p">)</span>
+
+        <span class="c1"># MODEL CENTRE LONGITUDES</span>
+        <span class="n">model_centre_lon</span> <span class="o">=</span> <span class="n">netcdf</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s2">&quot;model_centre_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;f8&quot;</span><span class="p">,</span> 
+                                                 <span class="p">(</span><span class="s2">&quot;model_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;model_longitude&quot;</span><span class="p">,),</span>
+                                                 <span class="n">zlib</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_lvl</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">complevel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_lvl</span><span class="p">)</span>
+        <span class="n">model_centre_lon</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;degrees_east&quot;</span>
+        <span class="n">model_centre_lon</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
+        <span class="n">model_centre_lon</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s2">&quot;model centre longitude&quot;</span>
+        <span class="n">model_centre_lon</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s2">&quot;model centre longitude&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">model_centre_lon</span><span class="o">.</span><span class="n">set_collective</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;2D meshed grid centre longitudes with &quot;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> longitudes in </span><span class="si">{}</span><span class="s2"> bands of latitude&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> 
+                                                              <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">model_centre_lon</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">msg</span>
+        <span class="n">model_centre_lon</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+        <span class="c1"># MODEL CENTRE LATITUDES</span>
+        <span class="n">model_centre_lat</span> <span class="o">=</span> <span class="n">netcdf</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s2">&quot;model_centre_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;f8&quot;</span><span class="p">,</span> 
+                                                 <span class="p">(</span><span class="s2">&quot;model_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;model_longitude&quot;</span><span class="p">,),</span>
+                                                 <span class="n">zlib</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_lvl</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">complevel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_lvl</span><span class="p">)</span>
+        <span class="n">model_centre_lat</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;degrees_north&quot;</span>
+        <span class="n">model_centre_lat</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+        <span class="n">model_centre_lat</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s2">&quot;model centre latitude&quot;</span>
+        <span class="n">model_centre_lat</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s2">&quot;model centre latitude&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">model_centre_lat</span><span class="o">.</span><span class="n">set_collective</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;2D meshed grid centre longitudes with &quot;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> longitudes in </span><span class="si">{}</span><span class="s2"> bands of latitude&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> 
+                                                              <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">model_centre_lat</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_centre_lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+        <span class="c1"># GRID EDGE DOMAIN LONGITUDES</span>
+        <span class="n">grid_edge_lon</span> <span class="o">=</span> <span class="n">netcdf</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s2">&quot;grid_edge_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;f8&quot;</span><span class="p">,</span> <span class="s2">&quot;grid_edge&quot;</span><span class="p">)</span>
+        <span class="n">grid_edge_lon</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;degrees_east&quot;</span>
+        <span class="n">grid_edge_lon</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;X&quot;</span>
+        <span class="n">grid_edge_lon</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s2">&quot;grid edge longitude&quot;</span>
+        <span class="n">grid_edge_lon</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s2">&quot;grid edge longitude&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">grid_edge_lon</span><span class="o">.</span><span class="n">set_collective</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Longitude coordinate along edge of grid domain &quot;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;(going clockwise around grid boundary from bottom-left corner).&quot;</span>
+        <span class="n">grid_edge_lon</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">msg</span>
+        <span class="n">grid_edge_lon</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_edge_lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+       
+        <span class="c1"># GRID EDGE DOMAIN LATITUDES</span>
+        <span class="n">grid_edge_lat</span> <span class="o">=</span> <span class="n">netcdf</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s2">&quot;grid_edge_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;f8&quot;</span><span class="p">,</span> <span class="s2">&quot;grid_edge&quot;</span><span class="p">)</span>
+        <span class="n">grid_edge_lat</span><span class="o">.</span><span class="n">units</span> <span class="o">=</span> <span class="s2">&quot;degrees_north&quot;</span>
+        <span class="n">grid_edge_lat</span><span class="o">.</span><span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;Y&quot;</span>
+        <span class="n">grid_edge_lat</span><span class="o">.</span><span class="n">long_name</span> <span class="o">=</span> <span class="s2">&quot;grid edge latitude&quot;</span>
+        <span class="n">grid_edge_lat</span><span class="o">.</span><span class="n">standard_name</span> <span class="o">=</span> <span class="s2">&quot;grid edge latitude&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">grid_edge_lat</span><span class="o">.</span><span class="n">set_collective</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Latitude coordinate along edge of grid domain &quot;</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;(going clockwise around grid boundary from bottom-left corner).&quot;</span>
+        <span class="n">grid_edge_lat</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">msg</span>
+        <span class="n">grid_edge_lat</span><span class="p">[:]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid_edge_lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">free_vars</span><span class="p">([</span><span class="s2">&quot;model_centre_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;model_centre_latitude&quot;</span><span class="p">,</span> <span class="s2">&quot;grid_edge_longitude&quot;</span><span class="p">,</span> <span class="s2">&quot;grid_edge_latitude&quot;</span><span class="p">])</span>
+
+    <span class="c1"># noinspection DuplicatedCode</span>
+    <span class="k">def</span> <span class="nf">_get_coordinate_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinate_info</span><span class="p">,</span> <span class="n">coordinate_axis</span><span class="p">,</span> <span class="n">bounds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the coordinate data of the current portion.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coordinate_info : dict, list</span>
+<span class="sd">            Dictionary with the &quot;data&quot; key with the coordinate variable values. and the attributes as other keys.</span>
+<span class="sd">        coordinate_axis : str</span>
+<span class="sd">            Name of the coordinate to extract. Accepted values: [&quot;X&quot;].</span>
+<span class="sd">        bounds : bool</span>
+<span class="sd">            Boolean variable to know if there are coordinate bounds.</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        values : dict</span>
+<span class="sd">            Dictionary with the portion of data corresponding to the rank.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">coordinate_info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">coordinate_info</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">coordinate_info</span><span class="p">)}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">coordinate_info</span><span class="p">)</span>
+
+        <span class="n">coordinate_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bounds</span><span class="p">:</span>
+            <span class="n">coordinate_len</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">coordinate_axis</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">coordinate_len</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">values</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="n">coordinate_len</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">values</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="n">coordinate_len</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">values</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">],</span> <span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;The coordinate has wrong dimensions: </span><span class="si">{dim}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">dim</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">coordinate_axis</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
+            <span class="c1"># pass for &quot;model_centre_lon&quot;, &quot;model_centre_lat&quot;, &quot;grid_edge_lon&quot; and &quot;grid_edge_lat&quot;</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">values</span>
+
+    <span class="c1"># noinspection DuplicatedCode</span>
+    <span class="k">def</span> <span class="nf">_read_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_name</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read the corresponding variable data according to the current rank.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        var_name : str</span>
+<span class="sd">            Name of the variable to read.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data: array</span>
+<span class="sd">            Portion of the variable data corresponding to the rank.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nc_var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span>
+        <span class="n">var_dims</span> <span class="o">=</span> <span class="n">nc_var</span><span class="o">.</span><span class="n">dimensions</span>
+
+        <span class="c1"># Read data in 1, 2 or 3 dimensions</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_dims</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">nc_var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">]]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">nc_var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">]]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_dims</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">nc_var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span>
+                          <span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">read_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">],</span>
+                          <span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Error with </span><span class="si">{0}</span><span class="s2">. Only can be read netCDF with 3 dimensions or less&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">var_name</span><span class="p">))</span>
+
+        <span class="c1"># Unmask array</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unmask_array</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">data</span>
+
+    <span class="c1"># noinspection DuplicatedCode</span>
+    <span class="k">def</span> <span class="nf">_create_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">netcdf</span><span class="p">,</span> <span class="n">chunking</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the netCDF file variables.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        netcdf : Dataset</span>
+<span class="sd">            netcdf4-python open Dataset.</span>
+<span class="sd">        chunking : bool</span>
+<span class="sd">            Indicates if you want to chunk the output netCDF.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">var_dict</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+                <span class="c1"># Get data type</span>
+                <span class="k">if</span> <span class="s2">&quot;dtype&quot;</span> <span class="ow">in</span> <span class="n">var_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">var_dtype</span> <span class="o">=</span> <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">var_dtype</span> <span class="o">!=</span> <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">):</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;WARNING!!! &quot;</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Different data types for variable </span><span class="si">{0}</span><span class="s2">. &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var_name</span><span class="p">)</span>
+                        <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Input dtype=</span><span class="si">{0}</span><span class="s2">. Data dtype=</span><span class="si">{1}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var_dtype</span><span class="p">,</span> 
+                                                                         <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                        <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">var_dtype</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># TODO: Detect exception</span>
+                            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;It was not possible to cast the data to the input dtype.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">var_dtype</span> <span class="o">=</span> <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span>
+                    <span class="k">if</span> <span class="n">var_dtype</span> <span class="ow">is</span> <span class="nb">object</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Data dtype is object. Define dtype explicitly as dictionary key &#39;dtype&#39;&quot;</span><span class="p">)</span>
+
+                <span class="c1"># Get dimensions when reading datasets</span>
+                <span class="k">if</span> <span class="s2">&quot;dimensions&quot;</span> <span class="ow">in</span> <span class="n">var_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">var_dims</span> <span class="o">=</span> <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;dimensions&quot;</span><span class="p">]</span>
+                <span class="c1"># Get dimensions when creating new datasets</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="c1"># For data that depends only on station (e.g. station_code)</span>
+                        <span class="n">var_dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_var_dim</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># For data that is dependent on time and station (e.g. PM10)</span>
+                        <span class="n">var_dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_var_dim</span> <span class="o">+</span> <span class="p">(</span><span class="s2">&quot;time&quot;</span><span class="p">,)</span>
+
+                <span class="k">if</span> <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        
+                    <span class="c1"># Ensure data is of type numpy array (to create NES)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="p">(</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">generic</span><span class="p">)):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span>
+                        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s2">&quot;Data for variable </span><span class="si">{0}</span><span class="s2"> must be a numpy array.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var_name</span><span class="p">))</span>
+
+                    <span class="c1"># Convert list of strings to chars for parallelization</span>
+                    <span class="k">if</span> <span class="n">issubdtype</span><span class="p">(</span><span class="n">var_dtype</span><span class="p">,</span> <span class="n">character</span><span class="p">):</span>
+                        <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data_aux&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_str2char</span><span class="p">(</span><span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span>
+                        <span class="n">var_dims</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&quot;strlen&quot;</span><span class="p">,)</span>
+                        <span class="n">var_dtype</span> <span class="o">=</span> <span class="s2">&quot;S1&quot;</span>
+                    
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rank </span><span class="si">{0:03d}</span><span class="s2">: Writing </span><span class="si">{1}</span><span class="s2"> var (</span><span class="si">{2}</span><span class="s2">/</span><span class="si">{3}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                                                           <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)))</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">chunking</span><span class="p">:</span>
+                    <span class="n">var</span> <span class="o">=</span> <span class="n">netcdf</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">var_dtype</span><span class="p">,</span> <span class="n">var_dims</span><span class="p">,</span>
+                                                <span class="n">zlib</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_lvl</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="n">complevel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_lvl</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                        <span class="n">chunk_size</span> <span class="o">=</span> <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">chunk_size</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">chunk_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">bcast</span><span class="p">(</span><span class="n">chunk_size</span><span class="p">,</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">var</span> <span class="o">=</span> <span class="n">netcdf</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="n">var_name</span><span class="p">,</span> <span class="n">var_dtype</span><span class="p">,</span> <span class="n">var_dims</span><span class="p">,</span> <span class="n">zlib</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_lvl</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span>
+                                                <span class="n">complevel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zip_lvl</span><span class="p">,</span> <span class="n">chunksizes</span><span class="o">=</span><span class="n">chunk_size</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rank </span><span class="si">{0:03d}</span><span class="s2">: Var </span><span class="si">{1}</span><span class="s2"> created (</span><span class="si">{2}</span><span class="s2">/</span><span class="si">{3}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">var</span><span class="o">.</span><span class="n">set_collective</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rank </span><span class="si">{0:03d}</span><span class="s2">: Var </span><span class="si">{1}</span><span class="s2"> collective (</span><span class="si">{2}</span><span class="s2">/</span><span class="si">{3}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)))</span>
+
+                <span class="k">for</span> <span class="n">att_name</span><span class="p">,</span> <span class="n">att_value</span> <span class="ow">in</span> <span class="n">var_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">att_name</span> <span class="o">==</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rank </span><span class="si">{0:03d}</span><span class="s2">: Filling </span><span class="si">{1}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">var_name</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="s2">&quot;data_aux&quot;</span> <span class="ow">in</span> <span class="n">var_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                            <span class="n">att_value</span> <span class="o">=</span> <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data_aux&quot;</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">att_value</span>
+                            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Different shapes. out_shape=</span><span class="si">{0}</span><span class="s2">, data_shp=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                    <span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+                            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Axis limits cannot be accessed. out_shape=</span><span class="si">{0}</span><span class="s2">, data_shp=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                    <span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+                        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="s2">&quot;strlen&quot;</span> <span class="ow">in</span> <span class="n">var_dims</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">att_value</span>
+                                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                                    <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Different shapes. out_shape=</span><span class="si">{0}</span><span class="s2">, data_shp=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                        <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span> <span class="p">:]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                        <span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+                                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Axis limits cannot be accessed. out_shape=</span><span class="si">{0}</span><span class="s2">, data_shp=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                        <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span> <span class="p">:]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                        <span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">att_value</span>
+                                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                                    <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Different shapes. out_shape=</span><span class="si">{0}</span><span class="s2">, data_shp=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                        <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span> 
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                        <span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+                                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Axis limits cannot be accessed. out_shape=</span><span class="si">{0}</span><span class="s2">, data_shp=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                        <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span> 
+                                            <span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                        <span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+                        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">],</span>
+                                    <span class="p">:]</span> <span class="o">=</span> <span class="n">att_value</span>
+                            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s2">&quot;Different shapes. out_shape=</span><span class="si">{0}</span><span class="s2">, data_shp=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">],</span>
+                                        <span class="p">:]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                    <span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>  
+                            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Axis limits cannot be accessed. out_shape=</span><span class="si">{0}</span><span class="s2">, data_shp=</span><span class="si">{1}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">var</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;x_max&quot;</span><span class="p">],</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_min&quot;</span><span class="p">]:</span><span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span><span class="p">[</span><span class="s2">&quot;t_max&quot;</span><span class="p">],</span>
+                                        <span class="p">:]</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                    <span class="n">att_value</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+                
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rank </span><span class="si">{0:03d}</span><span class="s2">: Var </span><span class="si">{1}</span><span class="s2"> data (</span><span class="si">{2}</span><span class="s2">/</span><span class="si">{3}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                                                                <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)))</span>
+                    <span class="k">elif</span> <span class="n">att_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;chunk_size&quot;</span><span class="p">,</span> <span class="s2">&quot;var_dims&quot;</span><span class="p">,</span> <span class="s2">&quot;dimensions&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="s2">&quot;data_aux&quot;</span><span class="p">]:</span>
+                        <span class="n">var</span><span class="o">.</span><span class="n">setncattr</span><span class="p">(</span><span class="n">att_name</span><span class="p">,</span> <span class="n">att_value</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="s2">&quot;data_aux&quot;</span> <span class="ow">in</span> <span class="n">var_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">del</span> <span class="n">var_dict</span><span class="p">[</span><span class="s2">&quot;data_aux&quot;</span><span class="p">]</span>
+                
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_var_crs</span><span class="p">(</span><span class="n">var</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Rank </span><span class="si">{0:03d}</span><span class="s2">: Var </span><span class="si">{1}</span><span class="s2"> completed (</span><span class="si">{2}</span><span class="s2">/</span><span class="si">{3}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rank</span><span class="p">,</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+                                                                             <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="c1"># noinspection DuplicatedCode</span>
+    <span class="k">def</span> <span class="nf">_gather_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_to_gather</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gather all the variable data into the MPI rank 0 to perform a serial write.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        data_to_gather: dict</span>
+<span class="sd">            Variables to gather.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">data_list</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">data_to_gather</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var_name</span><span class="p">,</span> <span class="n">var_info</span> <span class="ow">in</span> <span class="n">data_list</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># noinspection PyArgumentList</span>
+                <span class="n">data_aux</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">data_list</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">root</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">shp_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_list</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+                    <span class="c1"># concatenate over station</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">shp_len</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="c1"># dimensions = (station)</span>
+                            <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">elif</span> <span class="n">shp_len</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="c1"># dimensions = (station, strlen) or</span>
+                            <span class="c1"># dimensions = (station, time)</span>
+                            <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;The points NetCDF must have &quot;</span>
+                            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;surface values (without levels).&quot;</span>
+                            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+                        <span class="c1"># concatenate over time</span>
+                        <span class="k">if</span> <span class="n">shp_len</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> 
+                            <span class="c1"># dimensions = (station)</span>
+                            <span class="n">axis</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">elif</span> <span class="n">shp_len</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="s2">&quot;strlen&quot;</span> <span class="ow">in</span> <span class="n">var_info</span><span class="p">[</span><span class="s2">&quot;dimensions&quot;</span><span class="p">]:</span>
+                                <span class="c1"># dimensions = (station, strlen)</span>
+                                <span class="n">axis</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># dimensions = (station, time)</span>
+                                <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;The points NetCDF must have &quot;</span>
+                            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;surface values (without levels).&quot;</span>
+                            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                            <span class="s2">&quot;Parallel method &#39;</span><span class="si">{meth}</span><span class="s2">&#39; is not implemented. Use one of these: </span><span class="si">{accept}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                <span class="n">meth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parallel_method</span><span class="p">,</span> <span class="n">accept</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="s2">&quot;T&quot;</span><span class="p">]))</span>
+                    <span class="n">data_list</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">(</span><span class="n">data_aux</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;**ERROR** an error has occurred while gathering the &#39;</span><span class="si">{</span><span class="n">var_name</span><span class="si">}</span><span class="s2">&#39; variable.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="c1"># print(e, file=sys.stderr)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">comm</span><span class="o">.</span><span class="n">Abort</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">data_list</span>
+
+<div class="viewcode-block" id="PointsNesProvidentia.to_netcdf">
+<a class="viewcode-back" href="../../../projections.html#nes.nc_projections.points_nes_providentia.PointsNesProvidentia.to_netcdf">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_netcdf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">compression_level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">serial</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">chunking</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nc_type</span><span class="o">=</span><span class="s2">&quot;NES&quot;</span><span class="p">,</span>
+                  <span class="n">keep_open</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write the netCDF output file.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        path : str</span>
+<span class="sd">            Path to the output netCDF file.</span>
+<span class="sd">        compression_level : int</span>
+<span class="sd">            Level of compression (0 to 9) Default: 0 (no compression).</span>
+<span class="sd">        serial : bool</span>
+<span class="sd">            Indicates if you want to write in serial or not. Default: False.</span>
+<span class="sd">        info : bool</span>
+<span class="sd">            Indicates if you want to print the information of each writing step by stdout Default: False.</span>
+<span class="sd">        chunking : bool</span>
+<span class="sd">            Indicates if you want a chunked netCDF output. Only available with non-serial writes. Default: False.</span>
+<span class="sd">        nc_type : str</span>
+<span class="sd">            Type to NetCDf to write. &quot;CAMS_RA&quot; or &quot;NES&quot;</span>
+<span class="sd">        keep_open : bool</span>
+<span class="sd">            Indicates if you want to keep open the NetCDH to fill the data by time-step</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">serial</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;WARNING!!! &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Providentia datasets cannot be written in parallel yet. &quot;</span>
+            <span class="n">msg</span> <span class="o">+=</span> <span class="s2">&quot;Changing to serial mode.&quot;</span>
+            <span class="n">warn</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            
+        <span class="nb">super</span><span class="p">(</span><span class="n">PointsNesProvidentia</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">to_netcdf</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">compression_level</span><span class="o">=</span><span class="n">compression_level</span><span class="p">,</span> 
+                                                    <span class="n">serial</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">chunking</span><span class="o">=</span><span class="n">chunking</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="c1"># noinspection DuplicatedCode</span>
+<div class="viewcode-block" id="PointsNesProvidentia.add_variables_to_shapefile">
+<a class="viewcode-back" href="../../../projections.html#nes.nc_projections.points_nes_providentia.PointsNesProvidentia.add_variables_to_shapefile">[docs]</a>
+    <span class="k">def</span> <span class="nf">add_variables_to_shapefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_list</span><span class="p">,</span> <span class="n">idx_lev</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">idx_time</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add variables data to shapefile.</span>
+
+<span class="sd">        var_list : list, str</span>
+<span class="sd">            List (or single string) of the variables to be loaded and saved in the shapefile.</span>
+<span class="sd">        idx_lev : int</span>
+<span class="sd">            Index of vertical level for which the data will be saved in the shapefile.</span>
+<span class="sd">        idx_time : int</span>
+<span class="sd">            Index of time for which the data will be saved in the shapefile.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">idx_lev</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Error: Points dataset has no level (Level: </span><span class="si">{0}</span><span class="s2">).&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">idx_lev</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="n">var_list</span><span class="p">:</span>
+            <span class="c1"># station as dimension</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;dimensions&quot;</span><span class="p">])</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shapefile</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][:]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="c1"># station and time as dimensions</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">shapefile</span><span class="p">[</span><span class="n">var_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][:,</span> <span class="n">idx_time</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_axis_index_</span><span class="p">(</span><span class="n">axis</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;T&quot;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;X&quot;</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown axis: </span><span class="si">{0}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">axis</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_set_var_crs</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the grid_mapping</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        var : Variable</span>
+<span class="sd">            netCDF4-python variable object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Carles Tena Medina, Alba Vilanova Cortezon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

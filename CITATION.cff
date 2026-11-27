@@ -1,0 +1,125 @@
+cff-version: 1.2.0
+message: "If you use HERMES_Δ in your research, please cite the software as follows and the associated scientific paper listed in references."
+title: "HERMES_Δ: High-Elective Resolution Modelling Emission System – Delta"
+version: 1.0.11
+doi: 10.5281/zenodo.21393947
+date-released: 2026-11-27
+license: GPL-3.0
+repository-code: https://github.com/BSC-ES/HERMES_Delta
+url: https://doi.org/10.5281/zenodo.21393947
+abstract: >-
+  HERMES_Δ (High-Elective Resolution Modelling Emission System – Delta) is an open-source,
+  parallel emission processing and downscaling system designed to transform officially
+  reported emission inventories into high-resolution, model-ready emission datasets for
+  atmospheric chemistry and greenhouse gas simulations.
+
+  The system processes emission inventories typically reported in aggregated tabular
+  formats and applies a configurable workflow that performs chemical speciation, vertical
+  distribution, temporal disaggregation and horizontal spatial allocation. Spatial
+  allocation is performed using vector and raster activity proxies, while temporal profiles
+  allow the transformation of annual emissions into hourly emissions. These transformations
+  enable the generation of emission datasets suitable for direct use in atmospheric
+  chemistry transport models.
+
+  HERMES_Δ is implemented in Python and designed to run efficiently on high-performance
+  computing (HPC) systems using MPI parallelization. All processing steps are controlled
+  through configuration files (INI and YAML), allowing users to adapt the workflow to
+  different emission inventories, spatial domains, sectors and modelling systems without
+  modifying the source code.
+
+  The system preserves traceability between the processed emissions and the original
+  reported inventory data, facilitating transparent and reproducible emission modelling
+  workflows. HERMES_Δ can therefore be used as the emission processing component of
+  research or operational air-quality modelling systems.
+
+  HERMES_Δ was developed as part of the high-Resolution air Emissions Systems to suPport
+  modellIng and monitoRing Efforts (RESPIRE) national project (https://respire.bsc.es/).
+  RESPIRE is part of Spain's Recovery, Transformation and Resilience Plan (Plan de
+  Recuperación, Transformación y Resiliencia, PRTR), funded by the European Union –
+  NextGenerationEU to support research and innovation initiatives following the COVID-19
+  crisis.
+
+  Source code: https://github.com/BSC-ES/HERMES_Delta
+
+  Benchmark dataset:
+  https://dataverse.bsc.es/dataset.xhtml?persistentId=perma:BSC/3ST00L
+
+authors:
+  - family-names: Tena
+    given-names: Carles
+    affiliation: Barcelona Supercomputing Center (BSC-CNS)
+    website: https://www.bsc.es/tena-carles
+    orcid: https://orcid.org/0000-0002-5768-6758
+
+  - family-names: Gehlen
+    given-names: Johanna
+    affiliation: Barcelona Supercomputing Center (BSC-CNS)
+    website: https://www.bsc.es/gehlen-johanna
+    orcid: https://orcid.org/0009-0000-8323-9997
+
+  - family-names: Rizza
+    given-names: Luca
+    affiliation: Barcelona Supercomputing Center (BSC-CNS)
+    website: https://www.bsc.es/es/rizza-luca
+    orcid: https://orcid.org/0009-0009-5105-9129
+
+  - family-names: Guevara
+    given-names: Marc
+    affiliation: Barcelona Supercomputing Center (BSC-CNS)
+    website: https://www.bsc.es/guevara-marc
+    orcid: https://orcid.org/0000-0001-9727-8583
+
+keywords:
+  - emission modelling
+  - emission inventories
+  - atmospheric chemistry
+  - air quality modelling
+  - chemical transport models
+  - HPC
+  - MPI
+
+references:
+  - type: article
+    authors:
+      - family-names: Guevara
+        given-names: Marc
+      - family-names: Tena
+        given-names: Carles
+      - family-names: Camps
+        given-names: Paula
+      - family-names: Oliveira
+        given-names: Kevin
+      - family-names: Gehlen
+        given-names: Johanna
+      - family-names: Albarracin
+        given-names: Ana
+      - family-names: Castesana
+        given-names: Patricia
+      - family-names: Collado
+        given-names: Oscar
+      - family-names: Herrero
+        given-names: Laura
+      - family-names: Legarreta
+        given-names: Oier
+      - family-names: Lombardich
+        given-names: Irene
+      - family-names: Piñero-Megías
+        given-names: Carolina
+      - family-names: Rizza
+        given-names: Luca
+      - family-names: Slater
+        given-names: Julia
+      - family-names: Viñas
+        given-names: Adrià
+      - family-names: Macchia
+        given-names: Francesca
+      - family-names: Montane
+        given-names: Gerard
+      - family-names: Jorba
+        given-names: Oriol
+      - family-names: Pérez García-Pando
+        given-names: Carlos
+    title: "HERMES_Δ v1.0.1: an open-source emission processor for translating official air pollutant and greenhouse gas inventories into model-ready emissions"
+    journal: "EGUsphere"
+    year: 2026
+    doi: 10.5194/egusphere-2026-4146

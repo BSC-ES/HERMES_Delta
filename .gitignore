@@ -1,0 +1,11 @@
+*__pycache__*
+*.pyc
+*.pkl
+.idea/
+.vscode/
+*rsync*
+.DS_Store
+*.log
+
+# Unignore .pkl files under tests/test_data/
+!hermes/hermesv3_d/tests/test_data/*.pkl

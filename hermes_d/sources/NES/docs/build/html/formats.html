@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Formats &mdash; nes 1.1.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=df104e6e"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Projections" href="projections.html" />
+    <link rel="prev" title="Methods" href="methods.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            nes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="object.html">The NES object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="methods.html">Methods</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Formats</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-nes.nes_formats.cams_ra_format">CAMS RA format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cams_ra_format.create_dimension_variables"><code class="docutils literal notranslate"><span class="pre">create_dimension_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cams_ra_format.create_dimensions"><code class="docutils literal notranslate"><span class="pre">create_dimensions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cams_ra_format.create_variables"><code class="docutils literal notranslate"><span class="pre">create_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cams_ra_format.to_netcdf_cams_ra"><code class="docutils literal notranslate"><span class="pre">to_netcdf_cams_ra()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nes.nes_formats.cmaq_format">CMAQ format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cmaq_format.change_variable_attributes"><code class="docutils literal notranslate"><span class="pre">change_variable_attributes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cmaq_format.create_dimension_variables"><code class="docutils literal notranslate"><span class="pre">create_dimension_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cmaq_format.create_dimensions"><code class="docutils literal notranslate"><span class="pre">create_dimensions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cmaq_format.create_tflag"><code class="docutils literal notranslate"><span class="pre">create_tflag()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cmaq_format.create_variables"><code class="docutils literal notranslate"><span class="pre">create_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cmaq_format.set_global_attributes"><code class="docutils literal notranslate"><span class="pre">set_global_attributes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cmaq_format.str_var_list"><code class="docutils literal notranslate"><span class="pre">str_var_list()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cmaq_format.to_cmaq_units"><code class="docutils literal notranslate"><span class="pre">to_cmaq_units()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.cmaq_format.to_netcdf_cmaq"><code class="docutils literal notranslate"><span class="pre">to_netcdf_cmaq()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nes.nes_formats.monarch_format">MONARCH format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.monarch_format.to_monarch_units"><code class="docutils literal notranslate"><span class="pre">to_monarch_units()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.monarch_format.to_netcdf_monarch"><code class="docutils literal notranslate"><span class="pre">to_netcdf_monarch()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nes.nes_formats.wrf_chem_format">WRF CHEM format</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.wrf_chem_format.change_variable_attributes"><code class="docutils literal notranslate"><span class="pre">change_variable_attributes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.wrf_chem_format.create_dimension_variables"><code class="docutils literal notranslate"><span class="pre">create_dimension_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.wrf_chem_format.create_dimensions"><code class="docutils literal notranslate"><span class="pre">create_dimensions()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.wrf_chem_format.create_times_var"><code class="docutils literal notranslate"><span class="pre">create_times_var()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.wrf_chem_format.create_variables"><code class="docutils literal notranslate"><span class="pre">create_variables()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.wrf_chem_format.set_global_attributes"><code class="docutils literal notranslate"><span class="pre">set_global_attributes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.wrf_chem_format.to_netcdf_wrf_chem"><code class="docutils literal notranslate"><span class="pre">to_netcdf_wrf_chem()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.nes_formats.wrf_chem_format.to_wrf_chem_units"><code class="docutils literal notranslate"><span class="pre">to_wrf_chem_units()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="projections.html">Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">nes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Formats</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/formats.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="formats">
+<h1>Formats<a class="headerlink" href="#formats" title="Link to this heading"></a></h1>
+<section id="module-nes.nes_formats.cams_ra_format">
+<span id="cams-ra-format"></span><h2>CAMS RA format<a class="headerlink" href="#module-nes.nes_formats.cams_ra_format" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cams_ra_format.create_dimension_variables">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cams_ra_format.</span></span><span class="sig-name descname"><span class="pre">create_dimension_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cams_ra_format.html#create_dimension_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cams_ra_format.create_dimension_variables" title="Link to this definition"></a></dt>
+<dd><p>Create the “time”, “time_bnds”, “lev”, “lat”, “lat_bnds”, “lon” and “lon_bnds” variables.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Source projection Nes Object.</p>
+</dd>
+<dt>netcdf<span class="classifier">Dataset</span></dt><dd><p>netcdf4-python open dataset.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cams_ra_format.create_dimensions">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cams_ra_format.</span></span><span class="sig-name descname"><span class="pre">create_dimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cams_ra_format.html#create_dimensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cams_ra_format.create_dimensions" title="Link to this definition"></a></dt>
+<dd><p>Create “time”, “time_bnds”, “lev”, “lon” and “lat” dimensions.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Source projection Nes Object.</p>
+</dd>
+<dt>netcdf<span class="classifier">Dataset</span></dt><dd><p>netcdf4-python open dataset.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cams_ra_format.create_variables">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cams_ra_format.</span></span><span class="sig-name descname"><span class="pre">create_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i_lev</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cams_ra_format.html#create_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cams_ra_format.create_variables" title="Link to this definition"></a></dt>
+<dd><p>Create and write variables to a netCDF file.</p>
+<section id="id2">
+<h3>Parameters<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Source projection Nes Object.</p>
+</dd>
+<dt>netcdf<span class="classifier">Dataset</span></dt><dd><p>netcdf4-python open dataset.</p>
+</dd>
+<dt>i_lev<span class="classifier">int</span></dt><dd><p>The specific level index to write data for.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cams_ra_format.to_netcdf_cams_ra">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cams_ra_format.</span></span><span class="sig-name descname"><span class="pre">to_netcdf_cams_ra</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cams_ra_format.html#to_netcdf_cams_ra"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cams_ra_format.to_netcdf_cams_ra" title="Link to this definition"></a></dt>
+<dd><p>Horizontal methods from one grid to another one.</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Source projection Nes Object.</p>
+</dd>
+<dt>path<span class="classifier">str</span></dt><dd><p>Path to the output netCDF file.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-nes.nes_formats.cmaq_format">
+<span id="cmaq-format"></span><h2>CMAQ format<a class="headerlink" href="#module-nes.nes_formats.cmaq_format" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cmaq_format.change_variable_attributes">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cmaq_format.</span></span><span class="sig-name descname"><span class="pre">change_variable_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cmaq_format.html#change_variable_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cmaq_format.change_variable_attributes" title="Link to this definition"></a></dt>
+<dd><p>Modify the emission list to be consistent to use the output as input for CMAQ model.</p>
+<section id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cmaq_format.create_dimension_variables">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cmaq_format.</span></span><span class="sig-name descname"><span class="pre">create_dimension_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cmaq_format.html#create_dimension_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cmaq_format.create_dimension_variables" title="Link to this definition"></a></dt>
+<dd><p>Create the “y” and “x” variables.</p>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+<dt>netcdf<span class="classifier">Dataset</span></dt><dd><p>NetCDF object.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cmaq_format.create_dimensions">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cmaq_format.</span></span><span class="sig-name descname"><span class="pre">create_dimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cmaq_format.html#create_dimensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cmaq_format.create_dimensions" title="Link to this definition"></a></dt>
+<dd><p>Create “time”, “time_bnds”, “lev”, “lon” and “lat” dimensions.</p>
+<section id="id6">
+<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Nes Object.</p>
+</dd>
+<dt>netcdf<span class="classifier">Dataset</span></dt><dd><p>netcdf4-python open dataset.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cmaq_format.create_tflag">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cmaq_format.</span></span><span class="sig-name descname"><span class="pre">create_tflag</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cmaq_format.html#create_tflag"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cmaq_format.create_tflag" title="Link to this definition"></a></dt>
+<dd><p>Create the content of the CMAQ variable TFLAG.</p>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>Array with the content of TFLAG.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cmaq_format.create_variables">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cmaq_format.</span></span><span class="sig-name descname"><span class="pre">create_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cmaq_format.html#create_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cmaq_format.create_variables" title="Link to this definition"></a></dt>
+<dd><p>Create the netCDF file variables.</p>
+<section id="id8">
+<h3>Parameters<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Nes Object.</p>
+</dd>
+<dt>netcdf<span class="classifier">Dataset</span></dt><dd><p>netcdf4-python open dataset.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cmaq_format.set_global_attributes">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cmaq_format.</span></span><span class="sig-name descname"><span class="pre">set_global_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cmaq_format.html#set_global_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cmaq_format.set_global_attributes" title="Link to this definition"></a></dt>
+<dd><p>Set the NetCDF global attributes.</p>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cmaq_format.str_var_list">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cmaq_format.</span></span><span class="sig-name descname"><span class="pre">str_var_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cmaq_format.html#str_var_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cmaq_format.str_var_list" title="Link to this definition"></a></dt>
+<dd><p>Transform the list of variable names to a string with the elements with 16 white spaces.</p>
+<section id="id10">
+<h3>Parameters<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+<section id="id11">
+<h3>Returns<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>str</dt><dd><p>List of variable names transformed on string.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cmaq_format.to_cmaq_units">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cmaq_format.</span></span><span class="sig-name descname"><span class="pre">to_cmaq_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cmaq_format.html#to_cmaq_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cmaq_format.to_cmaq_units" title="Link to this definition"></a></dt>
+<dd><p>Change the data values according to the CMAQ conventions</p>
+<section id="id12">
+<h3>Parameters<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+<section id="id13">
+<h3>Returns<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dict</dt><dd><p>Variable in the MONARCH units.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.cmaq_format.to_netcdf_cmaq">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.cmaq_format.</span></span><span class="sig-name descname"><span class="pre">to_netcdf_cmaq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/cmaq_format.html#to_netcdf_cmaq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.cmaq_format.to_netcdf_cmaq" title="Link to this definition"></a></dt>
+<dd><p>Create the NetCDF using netcdf4-python methods.</p>
+<section id="id14">
+<h3>Parameters<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Source projection Nes Object.</p>
+</dd>
+<dt>path<span class="classifier">str</span></dt><dd><p>Path to the output netCDF file.</p>
+</dd>
+<dt>keep_open<span class="classifier">bool</span></dt><dd><p>Indicates if you want to keep open the NetCDH to fill the data by time-step.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-nes.nes_formats.monarch_format">
+<span id="monarch-format"></span><h2>MONARCH format<a class="headerlink" href="#module-nes.nes_formats.monarch_format" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.monarch_format.to_monarch_units">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.monarch_format.</span></span><span class="sig-name descname"><span class="pre">to_monarch_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/monarch_format.html#to_monarch_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.monarch_format.to_monarch_units" title="Link to this definition"></a></dt>
+<dd><p>Change the data values according to the MONARCH conventions.</p>
+<section id="id15">
+<h3>Parameters<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+<section id="id16">
+<h3>Returns<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dict</dt><dd><p>Variable in the MONARCH units.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.monarch_format.to_netcdf_monarch">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.monarch_format.</span></span><span class="sig-name descname"><span class="pre">to_netcdf_monarch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">chunking</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/monarch_format.html#to_netcdf_monarch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.monarch_format.to_netcdf_monarch" title="Link to this definition"></a></dt>
+<dd><p>Create the NetCDF using netcdf4-python methods.</p>
+<section id="id17">
+<h3>Parameters<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Source projection Nes Object.</p>
+</dd>
+<dt>path<span class="classifier">str</span></dt><dd><p>Path to the output netCDF file.</p>
+</dd>
+<dt>chunking: bool</dt><dd><p>Indicates if you want to chunk the output netCDF.</p>
+</dd>
+<dt>keep_open<span class="classifier">bool</span></dt><dd><p>Indicates if you want to keep open the NetCDH to fill the data by time-step.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-nes.nes_formats.wrf_chem_format">
+<span id="wrf-chem-format"></span><h2>WRF CHEM format<a class="headerlink" href="#module-nes.nes_formats.wrf_chem_format" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.wrf_chem_format.change_variable_attributes">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.wrf_chem_format.</span></span><span class="sig-name descname"><span class="pre">change_variable_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/wrf_chem_format.html#change_variable_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.wrf_chem_format.change_variable_attributes" title="Link to this definition"></a></dt>
+<dd><p>Modify the emission list to be consistent to use the output as input for WRF-CHEM model.</p>
+<section id="id18">
+<h3>Parameters<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.wrf_chem_format.create_dimension_variables">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.wrf_chem_format.</span></span><span class="sig-name descname"><span class="pre">create_dimension_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/wrf_chem_format.html#create_dimension_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.wrf_chem_format.create_dimension_variables" title="Link to this definition"></a></dt>
+<dd><p>Create the “y” and “x” variables.</p>
+<section id="id19">
+<h3>Parameters<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+<dt>netcdf<span class="classifier">Dataset</span></dt><dd><p>NetCDF object.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.wrf_chem_format.create_dimensions">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.wrf_chem_format.</span></span><span class="sig-name descname"><span class="pre">create_dimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/wrf_chem_format.html#create_dimensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.wrf_chem_format.create_dimensions" title="Link to this definition"></a></dt>
+<dd><p>Create “time”, “time_bnds”, “lev”, “lon” and “lat” dimensions.</p>
+<section id="id20">
+<h3>Parameters<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Nes Object.</p>
+</dd>
+<dt>netcdf<span class="classifier">Dataset</span></dt><dd><p>netcdf4-python open dataset.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.wrf_chem_format.create_times_var">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.wrf_chem_format.</span></span><span class="sig-name descname"><span class="pre">create_times_var</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/wrf_chem_format.html#create_times_var"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.wrf_chem_format.create_times_var" title="Link to this definition"></a></dt>
+<dd><p>Create the content of the WRF-CHEM variable times.</p>
+<section id="id21">
+<h3>Parameters<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+<section id="id22">
+<h3>Returns<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>numpy.ndarray</dt><dd><p>Array with the content of TFLAG.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.wrf_chem_format.create_variables">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.wrf_chem_format.</span></span><span class="sig-name descname"><span class="pre">create_variables</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">netcdf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/wrf_chem_format.html#create_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.wrf_chem_format.create_variables" title="Link to this definition"></a></dt>
+<dd><p>Create the netCDF file variables.</p>
+<section id="id23">
+<h3>Parameters<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Nes Object.</p>
+</dd>
+<dt>netcdf<span class="classifier">Dataset</span></dt><dd><p>netcdf4-python open dataset.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.wrf_chem_format.set_global_attributes">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.wrf_chem_format.</span></span><span class="sig-name descname"><span class="pre">set_global_attributes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/wrf_chem_format.html#set_global_attributes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.wrf_chem_format.set_global_attributes" title="Link to this definition"></a></dt>
+<dd><p>Set the NetCDF global attributes</p>
+<section id="id24">
+<h3>Parameters<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.wrf_chem_format.to_netcdf_wrf_chem">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.wrf_chem_format.</span></span><span class="sig-name descname"><span class="pre">to_netcdf_wrf_chem</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/wrf_chem_format.html#to_netcdf_wrf_chem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.wrf_chem_format.to_netcdf_wrf_chem" title="Link to this definition"></a></dt>
+<dd><p>Create the NetCDF using netcdf4-python methods.</p>
+<section id="id25">
+<h3>Parameters<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>Source projection Nes Object.</p>
+</dd>
+<dt>path<span class="classifier">str</span></dt><dd><p>Path to the output netCDF file.</p>
+</dd>
+<dt>keep_open<span class="classifier">bool</span></dt><dd><p>Indicates if you want to keep open the NetCDH to fill the data by time-step.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.nes_formats.wrf_chem_format.to_wrf_chem_units">
+<span class="sig-prename descclassname"><span class="pre">nes.nes_formats.wrf_chem_format.</span></span><span class="sig-name descname"><span class="pre">to_wrf_chem_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/nes_formats/wrf_chem_format.html#to_wrf_chem_units"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.nes_formats.wrf_chem_format.to_wrf_chem_units" title="Link to this definition"></a></dt>
+<dd><p>Change the data values according to the WRF-CHEM conventions.</p>
+<section id="id26">
+<h3>Parameters<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>self<span class="classifier">nes.Nes</span></dt><dd><p>A Nes Object.</p>
+</dd>
+</dl>
+</section>
+<section id="id27">
+<h3>Returns<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>dict</dt><dd><p>Variable in the MONARCH units.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="methods.html" class="btn btn-neutral float-left" title="Methods" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="projections.html" class="btn btn-neutral float-right" title="Projections" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Carles Tena Medina, Alba Vilanova Cortezon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

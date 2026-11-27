@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nes.methods.cell_measures &mdash; nes 1.1.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=df104e6e"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            nes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../object.html">The NES object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../methods.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../formats.html">Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../projections.html">Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">nes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nes.methods.cell_measures</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nes.methods.cell_measures</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">empty</span><span class="p">,</span> <span class="n">newaxis</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">arcsin</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">fabs</span><span class="p">,</span> <span class="n">arctan</span><span class="p">,</span> <span class="n">sqrt</span><span class="p">,</span> <span class="n">radians</span><span class="p">,</span> <span class="n">cos</span><span class="p">,</span> <span class="n">sin</span><span class="p">,</span> <span class="n">column_stack</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+
+
+<div class="viewcode-block" id="calculate_grid_area">
+<a class="viewcode-back" href="../../../methods.html#nes.methods.cell_measures.calculate_grid_area">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_grid_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get coordinate bounds and call function to calculate the area of each cell of a grid.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self : nes.Nes</span>
+<span class="sd">        Source projection Nes Object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        
+    <span class="c1"># Create bounds if they do not exist</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat_bnds</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon_bnds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">create_spatial_bounds</span><span class="p">()</span>
+
+    <span class="c1"># Get spatial number of vertices</span>
+    <span class="n">spatial_nv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Reshape bounds</span>
+    <span class="k">if</span> <span class="n">spatial_nv</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+
+        <span class="n">aux_shape</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">4</span><span class="p">)</span>
+        <span class="n">lon_bnds_aux</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">aux_shape</span><span class="p">)</span>
+        <span class="n">lon_bnds_aux</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">lon_bnds_aux</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">lon_bnds_aux</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">lon_bnds_aux</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">newaxis</span><span class="p">,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">lon_bnds</span> <span class="o">=</span> <span class="n">lon_bnds_aux</span>
+        <span class="k">del</span> <span class="n">lon_bnds_aux</span>
+
+        <span class="n">lat_bnds_aux</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">aux_shape</span><span class="p">)</span>
+        <span class="n">lat_bnds_aux</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][:,</span> <span class="n">newaxis</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">lat_bnds_aux</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][:,</span> <span class="n">newaxis</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">lat_bnds_aux</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][:,</span> <span class="n">newaxis</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">lat_bnds_aux</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">][:,</span> <span class="n">newaxis</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">lat_bnds</span> <span class="o">=</span> <span class="n">lat_bnds_aux</span>
+        <span class="k">del</span> <span class="n">lat_bnds_aux</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lon_bnds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lon_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="n">lat_bnds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat_bnds</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+    <span class="c1"># Reshape bounds and assign as grid corner coordinates</span>
+    <span class="n">grid_corner_lon</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">lon_bnds</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">lon_bnds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">lon_bnds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> 
+                                                 <span class="n">lon_bnds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">grid_corner_lat</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">lat_bnds</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">lat_bnds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">lat_bnds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> 
+                                                 <span class="n">lat_bnds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    
+    <span class="c1"># Calculate cell areas</span>
+    <span class="n">grid_area</span> <span class="o">=</span> <span class="n">calculate_cell_area</span><span class="p">(</span><span class="n">grid_corner_lon</span><span class="p">,</span> <span class="n">grid_corner_lat</span><span class="p">,</span> 
+                                    <span class="n">earth_radius_minor_axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">earth_radius</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> 
+                                    <span class="n">earth_radius_major_axis</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">earth_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">grid_area</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_geometry_area">
+<a class="viewcode-back" href="../../../methods.html#nes.methods.cell_measures.calculate_geometry_area">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_geometry_area</span><span class="p">(</span><span class="n">geometry_list</span><span class="p">,</span> <span class="n">earth_radius_minor_axis</span><span class="o">=</span><span class="mf">6356752.3142</span><span class="p">,</span> 
+                            <span class="n">earth_radius_major_axis</span><span class="o">=</span><span class="mf">6378137.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get coordinate bounds and call function to calculate the area of each cell of a set of geometries.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    geometry_list : List</span>
+<span class="sd">        A List with polygon geometries.</span>
+<span class="sd">    earth_radius_minor_axis : float</span>
+<span class="sd">        Radius of the minor axis of the Earth.</span>
+<span class="sd">    earth_radius_major_axis : float</span>
+<span class="sd">        Radius of the major axis of the Earth.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">geometry_area</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">geometry_list</span><span class="p">,)))</span>
+    
+    <span class="k">for</span> <span class="n">geom_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">geometry_list</span><span class="p">)):</span>
+        
+        <span class="c1"># Calculate the area of each geometry in multipolygon and collection objects</span>
+        <span class="k">if</span> <span class="n">geometry_list</span><span class="p">[</span><span class="n">geom_ind</span><span class="p">]</span><span class="o">.</span><span class="n">geom_type</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;MultiPolygon&quot;</span><span class="p">,</span> <span class="s2">&quot;GeometryCollection&quot;</span><span class="p">]:</span>
+            <span class="n">multi_geom_area</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">multi_geom_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">geometry_list</span><span class="p">[</span><span class="n">geom_ind</span><span class="p">]</span><span class="o">.</span><span class="n">geoms</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">geometry_list</span><span class="p">[</span><span class="n">geom_ind</span><span class="p">]</span><span class="o">.</span><span class="n">geoms</span><span class="p">[</span><span class="n">multi_geom_ind</span><span class="p">]</span><span class="o">.</span><span class="n">geom_type</span> <span class="o">==</span> <span class="s2">&quot;Point&quot;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">geometry_corner_lon</span><span class="p">,</span> <span class="n">geometry_corner_lat</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">geometry_list</span><span class="p">[</span><span class="n">geom_ind</span><span class="p">]</span><span class="o">.</span><span class="n">geoms</span><span class="p">[</span><span class="n">multi_geom_ind</span><span class="p">]</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span>
+                <span class="n">geometry_corner_lon</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">geometry_corner_lon</span><span class="p">)</span>
+                <span class="n">geometry_corner_lat</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">geometry_corner_lat</span><span class="p">)</span>
+                <span class="n">geom_area</span> <span class="o">=</span> <span class="n">__mod_huiliers_area</span><span class="p">(</span><span class="n">geometry_corner_lon</span><span class="p">,</span> <span class="n">geometry_corner_lat</span><span class="p">)</span>
+                <span class="n">multi_geom_area</span> <span class="o">+=</span> <span class="n">geom_area</span>
+            <span class="n">geometry_area</span><span class="p">[</span><span class="n">geom_ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">multi_geom_area</span> <span class="o">*</span> <span class="n">earth_radius_minor_axis</span> <span class="o">*</span> <span class="n">earth_radius_major_axis</span>
+        
+        <span class="c1"># Calculate the area of each geometry</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">geometry_corner_lon</span><span class="p">,</span> <span class="n">geometry_corner_lat</span> <span class="o">=</span> <span class="n">geometry_list</span><span class="p">[</span><span class="n">geom_ind</span><span class="p">]</span><span class="o">.</span><span class="n">exterior</span><span class="o">.</span><span class="n">coords</span><span class="o">.</span><span class="n">xy</span>
+            <span class="n">geometry_corner_lon</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">geometry_corner_lon</span><span class="p">)</span>
+            <span class="n">geometry_corner_lat</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span><span class="n">geometry_corner_lat</span><span class="p">)</span>
+            <span class="n">geom_area</span> <span class="o">=</span> <span class="n">__mod_huiliers_area</span><span class="p">(</span><span class="n">geometry_corner_lon</span><span class="p">,</span> <span class="n">geometry_corner_lat</span><span class="p">)</span>
+            <span class="n">geometry_area</span><span class="p">[</span><span class="n">geom_ind</span><span class="p">]</span> <span class="o">=</span> <span class="n">geom_area</span> <span class="o">*</span> <span class="n">earth_radius_minor_axis</span> <span class="o">*</span> <span class="n">earth_radius_major_axis</span>
+
+    <span class="k">return</span> <span class="n">geometry_area</span></div>
+
+
+
+<div class="viewcode-block" id="calculate_cell_area">
+<a class="viewcode-back" href="../../../methods.html#nes.methods.cell_measures.calculate_cell_area">[docs]</a>
+<span class="k">def</span> <span class="nf">calculate_cell_area</span><span class="p">(</span><span class="n">grid_corner_lon</span><span class="p">,</span> <span class="n">grid_corner_lat</span><span class="p">,</span>
+                        <span class="n">earth_radius_minor_axis</span><span class="o">=</span><span class="mf">6356752.3142</span><span class="p">,</span> <span class="n">earth_radius_major_axis</span><span class="o">=</span><span class="mf">6378137.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the area of each cell of a grid.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    grid_corner_lon : array</span>
+<span class="sd">        An Array with longitude bounds of grid.</span>
+<span class="sd">    grid_corner_lat : array</span>
+<span class="sd">        An Array with longitude bounds of grid.</span>
+<span class="sd">    earth_radius_minor_axis : float</span>
+<span class="sd">        Radius of the minor axis of the Earth.</span>
+<span class="sd">    earth_radius_major_axis : float</span>
+<span class="sd">        Radius of the major axis of the Earth.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Calculate area for each grid cell</span>
+    <span class="n">n_cells</span> <span class="o">=</span> <span class="n">grid_corner_lon</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_cells</span><span class="p">,))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n_cells</span><span class="p">):</span>
+        <span class="n">area</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">__mod_huiliers_area</span><span class="p">(</span><span class="n">grid_corner_lon</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">grid_corner_lat</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">area</span><span class="o">*</span><span class="n">earth_radius_minor_axis</span><span class="o">*</span><span class="n">earth_radius_major_axis</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">__mod_huiliers_area</span><span class="p">(</span><span class="n">cell_corner_lon</span><span class="p">,</span> <span class="n">cell_corner_lat</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate the area of each cell according to Huilier&#39;s theorem.</span>
+<span class="sd">    Reference: CDO (https://earth.bsc.es/gitlab/ces/cdo/).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cell_corner_lon : array</span>
+<span class="sd">        Longitude boundaries of each cell.</span>
+<span class="sd">    cell_corner_lat : array</span>
+<span class="sd">        Latitude boundaries of each cell.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">my_sum</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Get points 0 (bottom left) and 1 (bottom right) in Earth coordinates</span>
+    <span class="n">point_0</span> <span class="o">=</span> <span class="n">__lon_lat_to_cartesian</span><span class="p">(</span><span class="n">cell_corner_lon</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cell_corner_lat</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">earth_radius_major_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">point_1</span> <span class="o">=</span> <span class="n">__lon_lat_to_cartesian</span><span class="p">(</span><span class="n">cell_corner_lon</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">cell_corner_lat</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">earth_radius_major_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">point_0</span><span class="p">,</span> <span class="n">point_1</span> <span class="o">=</span> <span class="n">point_0</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">point_1</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="c1"># Get number of vertices</span>
+    <span class="k">if</span> <span class="n">cell_corner_lat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cell_corner_lat</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">spatial_nv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_corner_lon</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">spatial_nv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cell_corner_lon</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">spatial_nv</span><span class="p">):</span>
+        
+        <span class="c1"># Get point 2 (top right) in Earth coordinates</span>
+        <span class="n">point_2</span> <span class="o">=</span> <span class="n">__lon_lat_to_cartesian</span><span class="p">(</span><span class="n">cell_corner_lon</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cell_corner_lat</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">earth_radius_major_axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">point_2</span> <span class="o">=</span> <span class="n">point_2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Calculate area of triangle between points 0, 1 and 2</span>
+        <span class="n">my_sum</span> <span class="o">+=</span> <span class="n">__tri_area</span><span class="p">(</span><span class="n">point_0</span><span class="p">,</span> <span class="n">point_1</span><span class="p">,</span> <span class="n">point_2</span><span class="p">)</span>
+        
+        <span class="c1"># Copy to calculate area of next triangle</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="p">(</span><span class="n">spatial_nv</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">point_1</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">point_2</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">my_sum</span>
+
+
+<span class="k">def</span> <span class="nf">__tri_area</span><span class="p">(</span><span class="n">point_0</span><span class="p">,</span> <span class="n">point_1</span><span class="p">,</span> <span class="n">point_2</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate area between three points that form a triangle.</span>
+<span class="sd">    Reference: CDO (https://earth.bsc.es/gitlab/ces/cdo/).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    point_0 : array</span>
+<span class="sd">        Position of first point in cartesian coordinates.</span>
+<span class="sd">    point_1 : array</span>
+<span class="sd">        Position of second point in cartesian coordinates.</span>
+<span class="sd">    point_2 : array</span>
+<span class="sd">        Position of third point in cartesian coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Get length of side a (between point 0 and 1)</span>
+    <span class="n">tmp_vec</span> <span class="o">=</span> <span class="n">__cross_product</span><span class="p">(</span><span class="n">point_0</span><span class="p">,</span> <span class="n">point_1</span><span class="p">)</span>
+    <span class="n">sin_a</span> <span class="o">=</span> <span class="n">__norm</span><span class="p">(</span><span class="n">tmp_vec</span><span class="p">)</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">arcsin</span><span class="p">(</span><span class="n">sin_a</span><span class="p">)</span>
+
+    <span class="c1"># Get length of side b (between point 0 and 2)</span>
+    <span class="n">tmp_vec</span> <span class="o">=</span> <span class="n">__cross_product</span><span class="p">(</span><span class="n">point_0</span><span class="p">,</span> <span class="n">point_2</span><span class="p">)</span>
+    <span class="n">sin_b</span> <span class="o">=</span> <span class="n">__norm</span><span class="p">(</span><span class="n">tmp_vec</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">arcsin</span><span class="p">(</span><span class="n">sin_b</span><span class="p">)</span>
+
+    <span class="c1"># Get length of side c (between point 1 and 2)</span>
+    <span class="n">tmp_vec</span> <span class="o">=</span> <span class="n">__cross_product</span><span class="p">(</span><span class="n">point_2</span><span class="p">,</span> <span class="n">point_1</span><span class="p">)</span>
+    <span class="n">sin_c</span> <span class="o">=</span> <span class="n">__norm</span><span class="p">(</span><span class="n">tmp_vec</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">arcsin</span><span class="p">(</span><span class="n">sin_c</span><span class="p">)</span>
+
+    <span class="c1"># Calculate area</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">a</span><span class="o">+</span><span class="n">b</span><span class="o">+</span><span class="n">c</span><span class="p">)</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">tan</span><span class="p">(</span><span class="n">s</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">tan</span><span class="p">((</span><span class="n">s</span> <span class="o">-</span> <span class="n">a</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">tan</span><span class="p">((</span><span class="n">s</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span> <span class="o">*</span> <span class="n">tan</span><span class="p">((</span><span class="n">s</span> <span class="o">-</span> <span class="n">c</span><span class="p">)</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">area</span> <span class="o">=</span> <span class="n">fabs</span><span class="p">(</span><span class="mf">4.0</span> <span class="o">*</span> <span class="n">arctan</span><span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="n">fabs</span><span class="p">(</span><span class="n">t</span><span class="p">))))</span>
+    
+    <span class="k">return</span> <span class="n">area</span>
+
+
+<span class="k">def</span> <span class="nf">__cross_product</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate cross product between two points.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : array</span>
+<span class="sd">        Position of point A in cartesian coordinates.</span>
+<span class="sd">    b : array</span>
+<span class="sd">        Position of point B in cartesian coordinates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> 
+            <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> 
+            <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+
+<span class="k">def</span> <span class="nf">__norm</span><span class="p">(</span><span class="n">cp</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Normalize the result of the cross product operation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cp : array</span>
+<span class="sd">        Cross product between two points.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">cp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">cp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">cp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">cp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">cp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">cp</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+
+
+<span class="c1"># noinspection DuplicatedCode</span>
+<span class="k">def</span> <span class="nf">__lon_lat_to_cartesian</span><span class="p">(</span><span class="n">lon</span><span class="p">,</span> <span class="n">lat</span><span class="p">,</span> <span class="n">earth_radius_major_axis</span><span class="o">=</span><span class="mf">6378137.0</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Calculate lon, lat coordinates of a point on a sphere.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    lon : array</span>
+<span class="sd">        Longitude values.</span>
+<span class="sd">    lat : array</span>
+<span class="sd">        Latitude values.</span>
+<span class="sd">    earth_radius_major_axis : float</span>
+<span class="sd">        Radius of the major axis of the Earth.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">lon_r</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lon</span><span class="p">)</span>
+    <span class="n">lat_r</span> <span class="o">=</span> <span class="n">radians</span><span class="p">(</span><span class="n">lat</span><span class="p">)</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">earth_radius_major_axis</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat_r</span><span class="p">)</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lon_r</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">earth_radius_major_axis</span> <span class="o">*</span> <span class="n">cos</span><span class="p">(</span><span class="n">lat_r</span><span class="p">)</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lon_r</span><span class="p">)</span>
+    <span class="n">z</span> <span class="o">=</span> <span class="n">earth_radius_major_axis</span> <span class="o">*</span> <span class="n">sin</span><span class="p">(</span><span class="n">lat_r</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">column_stack</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Carles Tena Medina, Alba Vilanova Cortezon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

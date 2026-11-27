@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The NES object &mdash; nes 1.1.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=df104e6e"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Methods" href="methods.html" />
+    <link rel="prev" title="Introduction" href="readme.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            nes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="readme.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">The NES object</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-nes.create_nes">Creating a NES object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nes.create_nes.create_nes"><code class="docutils literal notranslate"><span class="pre">create_nes()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.create_nes.from_shapefile"><code class="docutils literal notranslate"><span class="pre">from_shapefile()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-nes.load_nes">Loading a NES object</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#nes.load_nes.concatenate_netcdfs"><code class="docutils literal notranslate"><span class="pre">concatenate_netcdfs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#nes.load_nes.open_netcdf"><code class="docutils literal notranslate"><span class="pre">open_netcdf()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="methods.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="formats.html">Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projections.html">Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">nes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">The NES object</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/object.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="the-nes-object">
+<h1>The NES object<a class="headerlink" href="#the-nes-object" title="Link to this heading"></a></h1>
+<section id="module-nes.create_nes">
+<span id="creating-a-nes-object"></span><h2>Creating a NES object<a class="headerlink" href="#module-nes.create_nes" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.create_nes.create_nes">
+<span class="sig-prename descclassname"><span class="pre">nes.create_nes.</span></span><span class="sig-name descname"><span class="pre">create_nes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">balanced</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">times</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_first_hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_last_hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/create_nes.html#create_nes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.create_nes.create_nes" title="Link to this definition"></a></dt>
+<dd><p>Create a Nes class from scratch.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>comm<span class="classifier">MPI.Comm, optional</span></dt><dd><p>MPI Communicator. If None, uses MPI.COMM_WORLD.</p>
+</dd>
+<dt>info<span class="classifier">bool, optional</span></dt><dd><p>Indicates if reading/writing info should be provided. Default is False.</p>
+</dd>
+<dt>projection<span class="classifier">str, optional</span></dt><dd><p>The projection type. Accepted values are None, “regular”, “global”, “rotated”, “rotated-nested”, “lcc”,
+“mercator”.</p>
+</dd>
+<dt>parallel_method<span class="classifier">str, optional</span></dt><dd><p>The parallelization method to use. Default is “Y”. Accepted values are [“X”, “Y”, “T”].</p>
+</dd>
+<dt>balanced<span class="classifier">bool, optional</span></dt><dd><p>Indicates if balanced parallelization is desired. Balanced datasets cannot be written in chunking mode.
+Default is False.</p>
+</dd>
+<dt>times<span class="classifier">list of datetime, optional</span></dt><dd><p>List of datetime objects representing the time dimension. If None, a default time array is created.</p>
+</dd>
+<dt>avoid_first_hours<span class="classifier">int, optional</span></dt><dd><p>Number of hours to remove from the start of the time steps. Default is 0.</p>
+</dd>
+<dt>avoid_last_hours<span class="classifier">int, optional</span></dt><dd><p>Number of hours to remove from the end of the time steps. Default is 0.</p>
+</dd>
+<dt>first_level<span class="classifier">int, optional</span></dt><dd><p>Index of the first level to use. Default is 0.</p>
+</dd>
+<dt>last_level<span class="classifier">int or None, optional</span></dt><dd><p>Index of the last level to use. If None, the last level is used. Default is None.</p>
+</dd>
+<dt><a href="#id1"><span class="problematic" id="id2">**</span></a>kwargs<span class="classifier">additional arguments</span></dt><dd><p>Additional parameters required for specific projections.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>nes<span class="classifier">Nes</span></dt><dd><p>An instance of the Nes class based on the specified parameters and projection.</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h3>Raises<a class="headerlink" href="#raises" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>If any required projection-specific parameters are missing or if invalid parameters are provided.</p>
+</dd>
+<dt>NotImplementedError</dt><dd><p>If an unsupported parallel method or projection type is specified.</p>
+</dd>
+</dl>
+</section>
+<section id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Link to this heading"></a></h3>
+<p>The function dynamically creates an instance of a specific Nes subclass based on the provided projection.
+The required parameters for each projection type are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>None: [“lat”, “lon”]</p></li>
+<li><p>“regular”: [“lat_orig”, “lon_orig”, “inc_lat”, “inc_lon”, “n_lat”, “n_lon”]</p></li>
+<li><p>“global”: [“inc_lat”, “inc_lon”]</p></li>
+<li><p>“rotated”: [“centre_lat”, “centre_lon”, “west_boundary”, “south_boundary”, “inc_rlat”, “inc_rlon”]</p></li>
+<li><p>“rotated-nested”: [“parent_grid_path”, “parent_ratio”, “i_parent_start”, “j_parent_start”, “n_rlat”, “n_rlon”]</p></li>
+<li><p>“lcc”: [“lat_1”, “lat_2”, “lon_0”, “lat_0”, “nx”, “ny”, “inc_x”, “inc_y”, “x_0”, “y_0”]</p></li>
+<li><p>“mercator”: [“lat_ts”, “lon_0”, “nx”, “ny”, “inc_x”, “inc_y”, “x_0”, “y_0”]</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h3>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">nes</span> <span class="o">=</span> <span class="n">create_nes</span><span class="p">(</span><span class="n">projection</span><span class="o">=</span><span class="s2">&quot;regular&quot;</span><span class="p">,</span> <span class="n">lat_orig</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">lon_orig</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inc_lat</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inc_lon</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_lat</span><span class="o">=</span><span class="mi">180</span><span class="p">,</span> <span class="n">n_lon</span><span class="o">=</span><span class="mi">360</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.create_nes.from_shapefile">
+<span class="sig-prename descclassname"><span class="pre">nes.create_nes.</span></span><span class="sig-name descname"><span class="pre">from_shapefile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Y'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/create_nes.html#from_shapefile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.create_nes.from_shapefile" title="Link to this definition"></a></dt>
+<dd><p>Create NES from shapefile data.</p>
+<ol class="arabic simple">
+<li><p>Create NES grid.</p></li>
+<li><p>Create shapefile for grid.</p></li>
+<li><p>Spatial join to add shapefile variables to NES variables.</p></li>
+</ol>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>path<span class="classifier">str</span></dt><dd><p>Path to shapefile.</p>
+</dd>
+<dt>method<span class="classifier">str</span></dt><dd><p>Overlay method. Accepted values: [“nearest”, “intersection”, None].</p>
+</dd>
+<dt>parallel_method<span class="classifier">str</span></dt><dd><p>Indicates the parallelization method that you want. Default: “Y”.
+accepted values: [“X”, “Y”, “T”].</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-nes.load_nes">
+<span id="loading-a-nes-object"></span><h2>Loading a NES object<a class="headerlink" href="#module-nes.load_nes" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.load_nes.concatenate_netcdfs">
+<span class="sig-prename descclassname"><span class="pre">nes.load_nes.</span></span><span class="sig-name descname"><span class="pre">concatenate_netcdfs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nessy_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_first_hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_last_hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">balanced</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/load_nes.html#concatenate_netcdfs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.load_nes.concatenate_netcdfs" title="Link to this definition"></a></dt>
+<dd><p>Concatenate variables form different sources.</p>
+<section id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>nessy_list<span class="classifier">list</span></dt><dd><p>A List of Nes objects or list of paths to concatenate.</p>
+</dd>
+<dt>comm<span class="classifier">MPI.Comm</span></dt><dd><p>MPI Communicator.</p>
+</dd>
+<dt>info: bool</dt><dd><p>Indicates if you want to get reading/writing info.</p>
+</dd>
+<dt>parallel_method<span class="classifier">str</span></dt><dd><p>Indicates the parallelization method that you want. Default: “Y”.
+accepted values: [“X”, “Y”, “T”].</p>
+</dd>
+<dt>balanced<span class="classifier">bool</span></dt><dd><p>Indicates if you want a balanced parallelization or not.
+Balanced dataset cannot be written in chunking mode.</p>
+</dd>
+<dt>avoid_first_hours<span class="classifier">int</span></dt><dd><p>Number of hours to remove from first time steps.</p>
+</dd>
+<dt>avoid_last_hours<span class="classifier">int</span></dt><dd><p>Number of hours to remove from last time steps.</p>
+</dd>
+<dt>first_level<span class="classifier">int</span></dt><dd><p>Index of the first level to use.</p>
+</dd>
+<dt>last_level<span class="classifier">int, None</span></dt><dd><p>Index of the last level to use. None if it is the last.</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h3>Returns<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Nes</dt><dd><p>A Nes object with all the variables.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nes.load_nes.open_netcdf">
+<span class="sig-prename descclassname"><span class="pre">nes.load_nes.</span></span><span class="sig-name descname"><span class="pre">open_netcdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">comm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallel_method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Y'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_first_hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">avoid_last_hours</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">first_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_level</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">balanced</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/nes/load_nes.html#open_netcdf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#nes.load_nes.open_netcdf" title="Link to this definition"></a></dt>
+<dd><p>Open a netCDF file.</p>
+<section id="id6">
+<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>path<span class="classifier">str</span></dt><dd><p>Path to the NetCDF file to read.</p>
+</dd>
+<dt>comm<span class="classifier">MPI.COMM</span></dt><dd><p>MPI communicator to use in that netCDF. Default: MPI.COMM_WORLD.</p>
+</dd>
+<dt>info<span class="classifier">bool</span></dt><dd><p>Indicates if you want to print (stdout) the reading/writing steps.</p>
+</dd>
+<dt>avoid_first_hours<span class="classifier">int</span></dt><dd><p>Number of hours to remove from first time steps.</p>
+</dd>
+<dt>avoid_last_hours<span class="classifier">int</span></dt><dd><p>Number of hours to remove from last time steps.</p>
+</dd>
+<dt>parallel_method<span class="classifier">str</span></dt><dd><p>Indicates the parallelization method that you want. Default: “Y”.
+Accepted values: [“X”, “Y”, “T”]</p>
+</dd>
+<dt>balanced<span class="classifier">bool</span></dt><dd><p>Indicates if you want a balanced parallelization or not. Balanced dataset cannot be written in chunking mode.</p>
+</dd>
+<dt>first_level<span class="classifier">int</span></dt><dd><p>Index of the first level to use.</p>
+</dd>
+<dt>last_level<span class="classifier">int, None</span></dt><dd><p>Index of the last level to use. None if it is the last.</p>
+</dd>
+</dl>
+</section>
+<section id="id7">
+<h3>Returns<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Nes</dt><dd><p>A Nes object. Variables read in lazy mode (only metadata).</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="readme.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="methods.html" class="btn btn-neutral float-right" title="Methods" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Carles Tena Medina, Alba Vilanova Cortezon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

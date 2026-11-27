@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nes.methods.vertical_interpolation &mdash; nes 1.1.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=df104e6e"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            nes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../object.html">The NES object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../methods.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../formats.html">Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../projections.html">Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">nes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nes.methods.vertical_interpolation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nes.methods.vertical_interpolation</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">nan</span><span class="p">,</span> <span class="n">flip</span><span class="p">,</span> <span class="n">cumsum</span><span class="p">,</span> <span class="n">nanmean</span><span class="p">,</span> <span class="n">empty</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">,</span> <span class="n">ma</span><span class="p">,</span> <span class="n">float64</span><span class="p">,</span> <span class="n">array</span><span class="p">,</span> <span class="n">interp</span><span class="p">,</span> <span class="n">where</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+
+<div class="viewcode-block" id="add_4d_vertical_info">
+<a class="viewcode-back" href="../../../methods.html#nes.methods.vertical_interpolation.add_4d_vertical_info">[docs]</a>
+<span class="k">def</span> <span class="nf">add_4d_vertical_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">info_to_add</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    To add the vertical information from other source.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self : nes.Nes</span>
+<span class="sd">        Source Nes object.</span>
+<span class="sd">    info_to_add : nes.Nes, str</span>
+<span class="sd">        Nes object with the vertical information as variable or str with the path to the NetCDF file that contains</span>
+<span class="sd">        the vertical data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">vertical_var</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">info_to_add</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">vertical_var_name</span> <span class="o">=</span> <span class="n">vertical_var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">__parse_extrapolate</span><span class="p">(</span><span class="n">extrapolate</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Parses the &quot;extrapolate&quot; parameter and returns a tuple representing the extrapolation options.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    extrapolate : bool or tuple or None or number or NaN</span>
+<span class="sd">        If bool:</span>
+<span class="sd">            - If True, both extrapolation options are set to &quot;extrapolate&quot;.</span>
+<span class="sd">            - If False, extrapolation options are set to (&quot;bottom&quot;, &quot;top&quot;).</span>
+<span class="sd">        If tuple:</span>
+<span class="sd">            - The first element represents the extrapolation option for the lower bound.</span>
+<span class="sd">            - The second element represents the extrapolation option for the upper bound.</span>
+<span class="sd">            - If any element is bool:</span>
+<span class="sd">                - If True, it represents &quot;extrapolate&quot;.</span>
+<span class="sd">                - If False:</span>
+<span class="sd">                    - If it&quot;s the first element, it represents &quot;bottom&quot;.</span>
+<span class="sd">                    - If it&quot;s the second element, it represents &quot;top&quot;.</span>
+<span class="sd">            - If any element is None, it is replaced with numpy.nan.</span>
+<span class="sd">            - Other numeric values are kept as they are.</span>
+<span class="sd">            - If any element is NaN, it is kept as NaN.</span>
+<span class="sd">        If None:</span>
+<span class="sd">            - Both extrapolation options are set to (NaN, NaN).</span>
+<span class="sd">        If number:</span>
+<span class="sd">            - Both extrapolation options are set to the provided number.</span>
+<span class="sd">        If NaN:</span>
+<span class="sd">            - Both extrapolation options are set to NaN.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    tuple</span>
+<span class="sd">        A tuple representing the extrapolation options. If the input is invalid, it returns</span>
+<span class="sd">        (&quot;extrapolate&quot;, &quot;extrapolate&quot;).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extrapolate</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">extrapolate</span><span class="p">:</span>
+            <span class="n">extrapolate_options</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;extrapolate&quot;</span><span class="p">,</span> <span class="s2">&quot;extrapolate&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">extrapolate_options</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="s2">&quot;top&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extrapolate</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">extrapolate_options</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">extrapolate</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">extrapolate</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">extrapolate</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                    <span class="n">extrapolate_options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;extrapolate&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">extrapolate_options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;bottom&quot;</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">extrapolate_options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;top&quot;</span>
+            <span class="k">elif</span> <span class="n">extrapolate</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">extrapolate_options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nan</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">extrapolate_options</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">extrapolate</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">extrapolate_options</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">extrapolate_options</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">extrapolate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">extrapolate_options</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">,</span> <span class="s2">&quot;top&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">extrapolate_options</span> <span class="o">=</span> <span class="p">(</span><span class="n">extrapolate</span><span class="p">,</span> <span class="n">extrapolate</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">extrapolate_options</span>
+
+
+<div class="viewcode-block" id="interpolate_vertical">
+<a class="viewcode-back" href="../../../methods.html#nes.methods.vertical_interpolation.interpolate_vertical">[docs]</a>
+<span class="k">def</span> <span class="nf">interpolate_vertical</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_levels</span><span class="p">,</span> <span class="n">new_src_vertical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kind</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="n">extrapolate_options</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                         <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Vertical interpolation.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    self : Nes</span>
+<span class="sd">        Source Nes object.</span>
+<span class="sd">    new_levels : List</span>
+<span class="sd">        A List of new vertical levels.</span>
+<span class="sd">    new_src_vertical : nes.Nes, str</span>
+<span class="sd">        Nes object with the vertical information as variable or str with the path to the NetCDF file that contains</span>
+<span class="sd">        the vertical data.</span>
+<span class="sd">    kind : str</span>
+<span class="sd">        Vertical methods type.</span>
+<span class="sd">    extrapolate_options : bool or tuple or None or number or NaN</span>
+<span class="sd">        If bool:</span>
+<span class="sd">            - If True, both extrapolation options are set to &quot;extrapolate&quot;.</span>
+<span class="sd">            - If False, extrapolation options are set to (&quot;bottom&quot;, &quot;top&quot;).</span>
+<span class="sd">        If tuple:</span>
+<span class="sd">            - The first element represents the extrapolation option for the lower bound.</span>
+<span class="sd">            - The second element represents the extrapolation option for the upper bound.</span>
+<span class="sd">            - If any element is bool:</span>
+<span class="sd">                - If True, it represents &quot;extrapolate&quot;.</span>
+<span class="sd">                - If False:</span>
+<span class="sd">                    - If it&quot;s the first element, it represents &quot;bottom&quot;.</span>
+<span class="sd">                    - If it&quot;s the second element, it represents &quot;top&quot;.</span>
+<span class="sd">            - If any element is None, it is replaced with numpy.nan.</span>
+<span class="sd">            - Other numeric values are kept as they are.</span>
+<span class="sd">            - If any element is NaN, it is kept as NaN.</span>
+<span class="sd">        If None:</span>
+<span class="sd">            - Both extrapolation options are set to (NaN, NaN).</span>
+<span class="sd">        If number:</span>
+<span class="sd">            - Both extrapolation options are set to the provided number.</span>
+<span class="sd">        If NaN:</span>
+<span class="sd">            - Both extrapolation options are set to NaN.</span>
+<span class="sd">    info: None, bool</span>
+<span class="sd">        Indicates if you want to print extra information.</span>
+<span class="sd">    overwrite: bool</span>
+<span class="sd">        Indicates if you want to compute the vertical interpolation in the same object or not.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">src_levels_aux</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fill_value</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">extrapolate_options</span> <span class="o">=</span> <span class="n">__parse_extrapolate</span><span class="p">(</span><span class="n">extrapolate_options</span><span class="p">)</span>
+    <span class="n">do_extrapolation</span> <span class="o">=</span> <span class="s2">&quot;extrapolate&quot;</span> <span class="ow">in</span> <span class="n">extrapolate_options</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lev</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;1D data cannot be vertically interpolated.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+        <span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">copy_vars</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">info</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span>
+
+    <span class="k">if</span> <span class="n">new_src_vertical</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_4d_vertical_info</span><span class="p">(</span><span class="n">new_src_vertical</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">new_levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">new_levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">ascendant</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ascendant</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">nz_new</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_levels</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_var_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># To use current level data</span>
+        <span class="n">current_level</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># Checking old order</span>
+        <span class="n">src_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lev</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">src_levels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">src_levels</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ascendant</span><span class="p">:</span>
+                <span class="n">do_flip</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">do_flip</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">src_levels</span> <span class="o">=</span> <span class="n">flip</span><span class="p">(</span><span class="n">src_levels</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ascendant</span><span class="p">:</span>
+                <span class="n">do_flip</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">do_flip</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">src_levels</span> <span class="o">=</span> <span class="n">flip</span><span class="p">(</span><span class="n">src_levels</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_level</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">src_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vertical_var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_var_name</span> <span class="o">==</span> <span class="s2">&quot;layer_thickness&quot;</span><span class="p">:</span>
+            <span class="n">src_levels</span> <span class="o">=</span> <span class="n">flip</span><span class="p">(</span><span class="n">cumsum</span><span class="p">(</span><span class="n">flip</span><span class="p">(</span><span class="n">src_levels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># src_levels = flip(src_levels, axis=1)</span>
+            <span class="k">pass</span>
+        <span class="c1"># Checking old order</span>
+        <span class="k">if</span> <span class="n">nanmean</span><span class="p">(</span><span class="n">src_levels</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:])</span> <span class="o">&gt;</span> <span class="n">nanmean</span><span class="p">(</span><span class="n">src_levels</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ascendant</span><span class="p">:</span>
+                <span class="n">do_flip</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">do_flip</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">src_levels</span> <span class="o">=</span> <span class="n">flip</span><span class="p">(</span><span class="n">src_levels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ascendant</span><span class="p">:</span>
+                <span class="n">do_flip</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">do_flip</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">src_levels</span> <span class="o">=</span> <span class="n">flip</span><span class="p">(</span><span class="n">src_levels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># Loop over variables</span>
+    <span class="k">for</span> <span class="n">var_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Load data if it is not loaded yet</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">var_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">var_name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_var_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">do_flip</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">flip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t</span><span class="si">{var}</span><span class="s2"> vertical methods&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">var</span><span class="o">=</span><span class="n">var_name</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+            <span class="n">nt</span><span class="p">,</span> <span class="n">nz</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">dst_data</span> <span class="o">=</span> <span class="n">empty</span><span class="p">((</span><span class="n">nt</span><span class="p">,</span> <span class="n">nz_new</span><span class="p">,</span> <span class="n">ny</span><span class="p">,</span> <span class="n">nx</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
+                <span class="c1"># if info and self.rank == self.size - 1:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">info</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">master</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\t\t</span><span class="si">{3}</span><span class="s2"> time step </span><span class="si">{0}</span><span class="s2"> (</span><span class="si">{1}</span><span class="s2">/</span><span class="si">{2}</span><span class="s2">))&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">t</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">nt</span><span class="p">,</span> <span class="n">var_name</span><span class="p">))</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ny</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nx</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">src_levels</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="c1"># To use 1D level information</span>
+                            <span class="n">curr_level_values</span> <span class="o">=</span> <span class="n">src_levels</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># To use 4D level data</span>
+                            <span class="n">curr_level_values</span> <span class="o">=</span> <span class="n">src_levels</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># Check if all values are identical or masked</span>
+                            <span class="k">if</span> <span class="p">((</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_level_values</span><span class="p">,</span> <span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span>
+                                 <span class="p">(</span><span class="n">curr_level_values</span> <span class="o">==</span> <span class="n">curr_level_values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">all</span><span class="p">())</span> <span class="ow">or</span>
+                                    <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">curr_level_values</span><span class="p">,</span> <span class="n">ma</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">)</span> <span class="ow">and</span>
+                                     <span class="n">curr_level_values</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">all</span><span class="p">())):</span>
+                                <span class="n">kind</span> <span class="o">=</span> <span class="s2">&quot;slinear&quot;</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">kind</span> <span class="o">=</span> <span class="n">kind</span>  <span class="c1"># &quot;cubic&quot;</span>
+
+                            <span class="c1"># Filtering filling values to extrapolation</span>
+                            <span class="n">fill_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">nan</span><span class="p">,</span> <span class="n">nan</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="s2">&quot;bottom&quot;</span> <span class="ow">in</span> <span class="n">extrapolate_options</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">ascendant</span><span class="p">:</span>
+                                    <span class="n">fill_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">float64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">fill_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">float64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">fill_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">extrapolate_options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="k">if</span> <span class="s2">&quot;top&quot;</span> <span class="ow">in</span> <span class="n">extrapolate_options</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">ascendant</span><span class="p">:</span>
+                                    <span class="n">fill_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">float64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">fill_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">float64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">fill_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">extrapolate_options</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">fill_value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">fill_value</span><span class="p">)</span>
+
+                            <span class="c1"># We force the methods with float64 to avoid negative values</span>
+                            <span class="c1"># We don&quot;t know why the negatives appears with float34</span>
+                            <span class="k">if</span> <span class="n">current_level</span><span class="p">:</span>
+                                <span class="c1"># 1D vertical component</span>
+                                <span class="n">src_levels_aux</span> <span class="o">=</span> <span class="n">src_levels</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># 4D vertical component</span>
+                                <span class="n">src_levels_aux</span> <span class="o">=</span> <span class="n">src_levels</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+
+                            <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span> <span class="ow">and</span> <span class="n">ascendant</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">do_extrapolation</span><span class="p">:</span>
+                                <span class="n">dst_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+                                    <span class="n">interp</span><span class="p">(</span><span class="n">new_levels</span><span class="p">,</span>
+                                           <span class="n">array</span><span class="p">(</span><span class="n">src_levels_aux</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">),</span>
+                                           <span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">),</span>
+                                           <span class="n">left</span><span class="o">=</span><span class="n">fill_value</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">right</span><span class="o">=</span><span class="n">fill_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                    <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">do_extrapolation</span><span class="p">:</span>
+                                    <span class="n">dst_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+                                        <span class="n">interp1d</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="n">src_levels_aux</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">),</span>
+                                                 <span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">),</span>
+                                                 <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+                                                 <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                 <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">)(</span><span class="n">new_levels</span><span class="p">),</span>
+                                        <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="c1"># If extrapolation first we need to extrapolate all (below &amp; above)</span>
+                                    <span class="n">dst_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">array</span><span class="p">(</span>
+                                        <span class="n">interp1d</span><span class="p">(</span><span class="n">array</span><span class="p">(</span><span class="n">src_levels_aux</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">),</span>
+                                                 <span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span>
+                                                       <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">),</span>
+                                                 <span class="n">kind</span><span class="o">=</span><span class="n">kind</span><span class="p">,</span>
+                                                 <span class="n">bounds_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                 <span class="n">fill_value</span><span class="o">=</span><span class="s2">&quot;extrapolate&quot;</span><span class="p">)(</span><span class="n">new_levels</span><span class="p">),</span>
+                                        <span class="n">dtype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                                    <span class="c1"># Check values below the lower vertical level</span>
+                                    <span class="k">if</span> <span class="n">fill_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;extrapolate&quot;</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="n">ascendant</span><span class="p">:</span>
+                                            <span class="n">idx_bellow</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">new_levels</span> <span class="o">&lt;</span> <span class="n">src_levels_aux</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                        <span class="k">else</span><span class="p">:</span>
+                                            <span class="n">idx_bellow</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">new_levels</span> <span class="o">&gt;</span> <span class="n">src_levels_aux</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                        <span class="n">dst_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="n">idx_bellow</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fill_value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                                    <span class="c1"># Check values above the upper vertical level</span>
+                                    <span class="k">if</span> <span class="n">fill_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;extrapolate&quot;</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="n">ascendant</span><span class="p">:</span>
+                                            <span class="n">idx_above</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">new_levels</span> <span class="o">&gt;</span> <span class="n">src_levels_aux</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                                        <span class="k">else</span><span class="p">:</span>
+                                            <span class="n">idx_above</span> <span class="o">=</span> <span class="n">where</span><span class="p">(</span><span class="n">new_levels</span> <span class="o">&lt;</span> <span class="n">src_levels_aux</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+                                        <span class="n">dst_data</span><span class="p">[</span><span class="n">t</span><span class="p">,</span> <span class="n">idx_above</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">fill_value</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;time lat lon&quot;</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;***********************&quot;</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LEVELS&quot;</span><span class="p">,</span> <span class="n">src_levels_aux</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;DATA&quot;</span><span class="p">,</span> <span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">][</span><span class="n">t</span><span class="p">,</span> <span class="p">:,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">))</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;METHOD&quot;</span><span class="p">,</span> <span class="n">kind</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;FILL_VALUE&quot;</span><span class="p">,</span> <span class="n">fill_value</span><span class="p">)</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;+++++++++++++++++++++++&quot;</span><span class="p">)</span>
+                            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                        <span class="c1"># if level_array is not None:</span>
+                        <span class="c1">#     dst_data[t, :, j, i] = array(f(level_array), dtype=float32)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="n">var_name</span><span class="p">][</span><span class="s2">&quot;data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">dst_data</span><span class="p">)</span>
+            <span class="c1"># print(self.variables[var_name][&quot;data&quot;])</span>
+
+    <span class="c1"># Update level information</span>
+    <span class="n">new_lev_info</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">array</span><span class="p">(</span><span class="n">new_levels</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="s2">&quot;positive&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lev</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="c1"># Vertical level direction</span>
+        <span class="k">if</span> <span class="n">flip</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">reverse_level_direction</span><span class="p">()</span>
+        <span class="n">new_lev_info</span><span class="p">[</span><span class="s2">&quot;positive&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lev</span><span class="p">[</span><span class="s2">&quot;positive&quot;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">vertical_var_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">var_attr</span><span class="p">,</span> <span class="n">attr_info</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">vertical_var_name</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">var_attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">,</span> <span class="s2">&quot;dimensions&quot;</span><span class="p">,</span> <span class="s2">&quot;crs&quot;</span><span class="p">,</span> <span class="s2">&quot;grid_mapping&quot;</span><span class="p">]:</span>
+                <span class="n">new_lev_info</span><span class="p">[</span><span class="n">var_attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">attr_info</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">free_vars</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vertical_var_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vertical_var_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">set_levels</span><span class="p">(</span><span class="n">new_lev_info</span><span class="p">)</span>
+
+    <span class="c1"># Remove original file information</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__ini_path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">return</span> <span class="bp">self</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Carles Tena Medina, Alba Vilanova Cortezon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

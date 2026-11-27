@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nes.nc_projections.latlon_nes &mdash; nes 1.1.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=df104e6e"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            nes
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../readme.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../object.html">The NES object</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../methods.html">Methods</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../formats.html">Formats</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../projections.html">Projections</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributing.html">Contributing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">CHANGELOG</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../authors.html">Authors</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">nes</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">nes.nc_projections.latlon_nes</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for nes.nc_projections.latlon_nes</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python</span>
+
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">float64</span><span class="p">,</span> <span class="n">linspace</span><span class="p">,</span> <span class="n">meshgrid</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">append</span><span class="p">,</span> <span class="n">flip</span><span class="p">,</span> <span class="n">repeat</span><span class="p">,</span> <span class="n">concatenate</span><span class="p">,</span> <span class="n">vstack</span>
+<span class="kn">from</span> <span class="nn">pyproj</span> <span class="kn">import</span> <span class="n">Proj</span>
+<span class="kn">from</span> <span class="nn">.default_nes</span> <span class="kn">import</span> <span class="n">Nes</span>
+
+
+<div class="viewcode-block" id="LatLonNes">
+<a class="viewcode-back" href="../../../projections.html#nes.nc_projections.latlon_nes.LatLonNes">[docs]</a>
+<span class="k">class</span> <span class="nc">LatLonNes</span><span class="p">(</span><span class="n">Nes</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    _var_dim : tuple</span>
+<span class="sd">        A Tuple with the name of the Y and X dimensions for the variables.</span>
+<span class="sd">        (&quot;lat&quot;, &quot;lon&quot;) for a regular latitude-longitude projection.</span>
+<span class="sd">    _lat_dim : tuple</span>
+<span class="sd">        A Tuple with the name of the dimensions of the Latitude values.</span>
+<span class="sd">        (&quot;lat&quot;, ) for a regular latitude-longitude projection.</span>
+<span class="sd">    _lon_dim : tuple</span>
+<span class="sd">        A Tuple with the name of the dimensions of the Longitude values.</span>
+<span class="sd">        (&quot;lon&quot;, ) for a regular latitude-longitude projection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+                 <span class="n">avoid_first_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">first_level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create_nes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">balanced</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the LatLonNes class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        comm: MPI.COMM</span>
+<span class="sd">            MPI Communicator.</span>
+<span class="sd">        path: str</span>
+<span class="sd">            Path to the NetCDF to initialize the object.</span>
+<span class="sd">        info: bool</span>
+<span class="sd">            Indicates if you want to get reading/writing info.</span>
+<span class="sd">        dataset: Dataset</span>
+<span class="sd">            NetCDF4-python Dataset to initialize the class.</span>
+<span class="sd">        parallel_method : str</span>
+<span class="sd">            Indicates the parallelization method that you want. Default: &quot;Y&quot;.</span>
+<span class="sd">            Accepted values: [&quot;X&quot;, &quot;Y&quot;, &quot;T&quot;].</span>
+<span class="sd">        avoid_first_hours : int</span>
+<span class="sd">            Number of hours to remove from first time steps.</span>
+<span class="sd">        avoid_last_hours : int</span>
+<span class="sd">            Number of hours to remove from last time steps.</span>
+<span class="sd">        first_level : int</span>
+<span class="sd">            Index of the first level to use.</span>
+<span class="sd">        last_level : int, None</span>
+<span class="sd">            Index of the last level to use. None if it is the last.</span>
+<span class="sd">        create_nes : bool</span>
+<span class="sd">            Indicates if you want to create the object from scratch (True) or through an existing file.</span>
+<span class="sd">        balanced : bool</span>
+<span class="sd">            Indicates if you want a balanced parallelization or not. </span>
+<span class="sd">            Balanced dataset cannot be written in chunking mode.</span>
+<span class="sd">        times : list, None</span>
+<span class="sd">            List of times to substitute the current ones while creation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="nb">super</span><span class="p">(</span><span class="n">LatLonNes</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+                                        <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span>
+                                        <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span>
+                                        <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span> <span class="n">create_nes</span><span class="o">=</span><span class="n">create_nes</span><span class="p">,</span>
+                                        <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">create_nes</span><span class="p">:</span>
+            <span class="c1"># Dimensions screening</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_full_latitudes</span><span class="p">(),</span> <span class="s2">&quot;Y&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_coordinate_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_full_longitudes</span><span class="p">(),</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Set axis limits for parallel writing</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_axis_limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_write_axis_limits</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_var_dim</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="s2">&quot;lon&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lat_dim</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lon_dim</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;lon&quot;</span><span class="p">,)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">free_vars</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LatLonNes.new">
+<a class="viewcode-back" href="../../../projections.html#nes.nc_projections.latlon_nes.LatLonNes.new">[docs]</a>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallel_method</span><span class="o">=</span><span class="s2">&quot;Y&quot;</span><span class="p">,</span>
+            <span class="n">avoid_first_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">avoid_last_hours</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">first_level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">create_nes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+            <span class="n">balanced</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the Nes class.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        comm: MPI.COMM</span>
+<span class="sd">            MPI Communicator.</span>
+<span class="sd">        path: str</span>
+<span class="sd">            Path to the NetCDF to initialize the object.</span>
+<span class="sd">        info: bool</span>
+<span class="sd">            Indicates if you want to get reading/writing info.</span>
+<span class="sd">        dataset: Dataset</span>
+<span class="sd">            NetCDF4-python Dataset to initialize the class.</span>
+<span class="sd">        parallel_method : str</span>
+<span class="sd">            Indicates the parallelization method that you want. Default: &quot;Y&quot;.</span>
+<span class="sd">            Accepted values: [&quot;X&quot;, &quot;Y&quot;, &quot;T&quot;].</span>
+<span class="sd">        avoid_first_hours : int</span>
+<span class="sd">            Number of hours to remove from first time steps.</span>
+<span class="sd">        avoid_last_hours : int</span>
+<span class="sd">            Number of hours to remove from last time steps.</span>
+<span class="sd">        first_level : int</span>
+<span class="sd">            Index of the first level to use.</span>
+<span class="sd">        last_level : int, None</span>
+<span class="sd">            Index of the last level to use. None if it is the last.</span>
+<span class="sd">        create_nes : bool</span>
+<span class="sd">            Indicates if you want to create the object from scratch (True) or through an existing file.</span>
+<span class="sd">        balanced : bool</span>
+<span class="sd">            Indicates if you want a balanced parallelization or not. </span>
+<span class="sd">            Balanced dataset cannot be written in chunking mode.</span>
+<span class="sd">        times : list, None</span>
+<span class="sd">            List of times to substitute the current ones while creation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">new</span> <span class="o">=</span> <span class="n">LatLonNes</span><span class="p">(</span><span class="n">comm</span><span class="o">=</span><span class="n">comm</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+                        <span class="n">parallel_method</span><span class="o">=</span><span class="n">parallel_method</span><span class="p">,</span> <span class="n">avoid_first_hours</span><span class="o">=</span><span class="n">avoid_first_hours</span><span class="p">,</span> 
+                        <span class="n">avoid_last_hours</span><span class="o">=</span><span class="n">avoid_last_hours</span><span class="p">,</span> <span class="n">first_level</span><span class="o">=</span><span class="n">first_level</span><span class="p">,</span> <span class="n">last_level</span><span class="o">=</span><span class="n">last_level</span><span class="p">,</span>
+                        <span class="n">create_nes</span><span class="o">=</span><span class="n">create_nes</span><span class="p">,</span> <span class="n">balanced</span><span class="o">=</span><span class="n">balanced</span><span class="p">,</span> <span class="n">times</span><span class="o">=</span><span class="n">times</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">new</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_pyproj_projection</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get projection data as in Pyproj library.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        projection : pyproj.Proj</span>
+<span class="sd">            Grid projection.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">projection</span> <span class="o">=</span> <span class="n">Proj</span><span class="p">(</span><span class="n">proj</span><span class="o">=</span><span class="s2">&quot;latlong&quot;</span><span class="p">,</span> <span class="n">ellps</span><span class="o">=</span><span class="s2">&quot;WGS84&quot;</span><span class="p">,)</span>
+
+        <span class="k">return</span> <span class="n">projection</span>
+
+    <span class="c1"># noinspection DuplicatedCode</span>
+    <span class="k">def</span> <span class="nf">_get_projection_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">create_nes</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieves projection data based on grid details.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        create_nes : bool</span>
+<span class="sd">            Flag indicating whether to create new object (True) or use existing (False).</span>
+<span class="sd">        **kwargs : dict</span>
+<span class="sd">            Additional keyword arguments for specifying projection details.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Dict[str, Any]</span>
+<span class="sd">            A dictionary containing projection data with the following keys:</span>
+<span class="sd">            - &quot;grid_mapping_name&quot; : str</span>
+<span class="sd">                Type of grid mapping (e.g., &quot;latitude_longitude&quot;).</span>
+<span class="sd">            - &quot;semi_major_axis&quot; : float</span>
+<span class="sd">                Semi-major axis of the Earth&#39;s ellipsoid.</span>
+<span class="sd">            - &quot;inverse_flattening&quot; : int</span>
+<span class="sd">                Inverse flattening parameter.</span>
+<span class="sd">            - &quot;inc_lat&quot; : float</span>
+<span class="sd">                Increment in latitude.</span>
+<span class="sd">            - &quot;inc_lon&quot; : float</span>
+<span class="sd">                Increment in longitude.</span>
+<span class="sd">            - &quot;lat_orig&quot; : float</span>
+<span class="sd">                Origin latitude of the grid.</span>
+<span class="sd">            - &quot;lon_orig&quot; : float</span>
+<span class="sd">                Origin longitude of the grid.</span>
+<span class="sd">            - &quot;n_lat&quot; : int</span>
+<span class="sd">                Number of grid points along latitude.</span>
+<span class="sd">            - &quot;n_lon&quot; : int</span>
+<span class="sd">                Number of grid points along longitude.</span>
+
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        Depending on the `create_nes` flag and input `kwargs`, the method constructs</span>
+<span class="sd">        or retrieves projection data. If `create_nes` is True, the method initializes</span>
+<span class="sd">        projection details based on provided arguments such as increments (`inc_lat`, `inc_lon`),</span>
+<span class="sd">        and if additional keyword arguments (`lat_orig`, `lon_orig`, `n_lat`, `n_lon`) are not provided,</span>
+<span class="sd">        defaults for the global domain are used. If `create_nes` is False, the method checks for</span>
+<span class="sd">        an existing &quot;crs&quot; variable in `self.variables` and retrieves its data, freeing the &quot;crs&quot; variable</span>
+<span class="sd">        afterward to optimize memory usage.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">create_nes</span><span class="p">:</span>
+            <span class="n">projection_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;grid_mapping_name&quot;</span><span class="p">:</span> <span class="s2">&quot;latitude_longitude&quot;</span><span class="p">,</span>
+                               <span class="s2">&quot;semi_major_axis&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">earth_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                               <span class="s2">&quot;inverse_flattening&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                               <span class="s2">&quot;inc_lat&quot;</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;inc_lat&quot;</span><span class="p">],</span>
+                               <span class="s2">&quot;inc_lon&quot;</span><span class="p">:</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;inc_lon&quot;</span><span class="p">],</span>
+                               <span class="p">}</span>
+            <span class="c1"># Global domain</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;lat_orig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">90</span>
+                <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;lon_orig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">180</span>
+                <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;n_lat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">180</span> <span class="o">//</span> <span class="n">float64</span><span class="p">(</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;inc_lat&quot;</span><span class="p">]))</span>
+                <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;n_lon&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">360</span> <span class="o">//</span> <span class="n">float64</span><span class="p">(</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;inc_lon&quot;</span><span class="p">]))</span>
+            <span class="c1"># Other domains</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;lat_orig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;lat_orig&quot;</span><span class="p">]</span>
+                <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;lon_orig&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;lon_orig&quot;</span><span class="p">]</span>
+                <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;n_lat&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;n_lat&quot;</span><span class="p">]</span>
+                <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;n_lon&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;n_lon&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;crs&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">projection_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;crs&quot;</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">free_vars</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">projection_data</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;grid_mapping_name&quot;</span><span class="p">:</span> <span class="s2">&quot;latitude_longitude&quot;</span><span class="p">,</span>
+                                   <span class="s2">&quot;semi_major_axis&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">earth_radius</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                   <span class="s2">&quot;inverse_flattening&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                                   <span class="p">}</span>
+
+            <span class="k">if</span> <span class="s2">&quot;dtype&quot;</span> <span class="ow">in</span> <span class="n">projection_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">del</span> <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;dtype&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;data&quot;</span> <span class="ow">in</span> <span class="n">projection_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">del</span> <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="s2">&quot;dimensions&quot;</span> <span class="ow">in</span> <span class="n">projection_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">del</span> <span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;dimensions&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">projection_data</span>
+
+    <span class="k">def</span> <span class="nf">_create_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">netcdf</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create &quot;spatial_nv&quot; dimensions and the super dimensions &quot;lev&quot;, &quot;time&quot;, &quot;time_nv&quot;, &quot;lon&quot; and &quot;lat&quot;.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        netcdf : Dataset</span>
+<span class="sd">            NetCDF object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">LatLonNes</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_create_dimensions</span><span class="p">(</span><span class="n">netcdf</span><span class="p">)</span>
+
+        <span class="n">netcdf</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s2">&quot;lon&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_full_longitudes</span><span class="p">()[</span><span class="s2">&quot;data&quot;</span><span class="p">]))</span>
+        <span class="n">netcdf</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s2">&quot;lat&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_full_latitudes</span><span class="p">()[</span><span class="s2">&quot;data&quot;</span><span class="p">]))</span>
+
+        <span class="c1"># Create spatial_nv (number of vertices) dimension</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat_bnds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lon_bnds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">netcdf</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s2">&quot;spatial_nv&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_create_centre_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate centre latitudes and longitudes from grid details.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        centre_lat : dict</span>
+<span class="sd">            Dictionary with data of centre latitudes in 1D</span>
+<span class="sd">        centre_lon : dict</span>
+<span class="sd">            Dictionary with data of centre longitudes in 1D</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get grid resolution</span>
+        <span class="n">inc_lat</span> <span class="o">=</span> <span class="n">float64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;inc_lat&quot;</span><span class="p">])</span>
+        <span class="n">inc_lon</span> <span class="o">=</span> <span class="n">float64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;inc_lon&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Get coordinates origen</span>
+        <span class="n">lat_orig</span> <span class="o">=</span> <span class="n">float64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;lat_orig&quot;</span><span class="p">])</span>
+        <span class="n">lon_orig</span> <span class="o">=</span> <span class="n">float64</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;lon_orig&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Get number of coordinates</span>
+        <span class="n">n_lat</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;n_lat&quot;</span><span class="p">])</span>
+        <span class="n">n_lon</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;n_lon&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Calculate centre latitudes</span>
+        <span class="n">lat_c_orig</span> <span class="o">=</span> <span class="n">lat_orig</span> <span class="o">+</span> <span class="p">(</span><span class="n">inc_lat</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">centre_lat</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="n">lat_c_orig</span><span class="p">,</span> <span class="n">lat_c_orig</span> <span class="o">+</span> <span class="p">(</span><span class="n">inc_lat</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_lat</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">n_lat</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="c1"># Calculate centre longitudes</span>
+        <span class="n">lon_c_orig</span> <span class="o">=</span> <span class="n">lon_orig</span> <span class="o">+</span> <span class="p">(</span><span class="n">inc_lon</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">centre_lon</span> <span class="o">=</span> <span class="n">linspace</span><span class="p">(</span><span class="n">lon_c_orig</span><span class="p">,</span> <span class="n">lon_c_orig</span> <span class="o">+</span> <span class="p">(</span><span class="n">inc_lon</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_lon</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">n_lon</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">centre_lat</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">centre_lon</span><span class="p">}</span>
+
+<div class="viewcode-block" id="LatLonNes.create_providentia_exp_centre_coordinates">
+<a class="viewcode-back" href="../../../projections.html#nes.nc_projections.latlon_nes.LatLonNes.create_providentia_exp_centre_coordinates">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_providentia_exp_centre_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate centre latitudes and longitudes from original coordinates and store as 2D arrays.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_centre_lat : dict</span>
+<span class="sd">            Dictionary with data of centre coordinates for latitude in 2D (latitude, longitude).</span>
+<span class="sd">        model_centre_lon : dict</span>
+<span class="sd">            Dictionary with data of centre coordinates for longitude in 2D (latitude, longitude).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">model_centre_lon_data</span><span class="p">,</span> <span class="n">model_centre_lat_data</span> <span class="o">=</span> <span class="n">meshgrid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span>
+
+        <span class="c1"># Calculate centre latitudes</span>
+        <span class="n">model_centre_lat</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">model_centre_lat_data</span><span class="p">}</span>
+
+        <span class="c1"># Calculate centre longitudes</span>
+        <span class="n">model_centre_lon</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">model_centre_lon_data</span><span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">model_centre_lat</span><span class="p">,</span> <span class="n">model_centre_lon</span></div>
+
+
+    <span class="c1"># noinspection DuplicatedCode</span>
+<div class="viewcode-block" id="LatLonNes.create_providentia_exp_grid_edge_coordinates">
+<a class="viewcode-back" href="../../../projections.html#nes.nc_projections.latlon_nes.LatLonNes.create_providentia_exp_grid_edge_coordinates">[docs]</a>
+    <span class="k">def</span> <span class="nf">create_providentia_exp_grid_edge_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Calculate grid edge latitudes and longitudes and get model grid outline.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        grid_edge_lat : dict</span>
+<span class="sd">            Dictionary with data of grid edge latitudes.</span>
+<span class="sd">        grid_edge_lon : dict</span>
+<span class="sd">            Dictionary with data of grid edge longitudes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Get grid resolution</span>
+        <span class="n">inc_lon</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mean</span><span class="p">(</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])))</span>
+        <span class="n">inc_lat</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mean</span><span class="p">(</span><span class="n">diff</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])))</span>
+
+        <span class="c1"># Get bounds</span>
+        <span class="n">lat_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_single_spatial_bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">inc_lat</span><span class="p">)</span>
+        <span class="n">lon_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_single_spatial_bounds</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">],</span> <span class="n">inc_lon</span><span class="p">)</span>
+
+        <span class="c1"># Get latitudes for grid edge</span>
+        <span class="n">left_edge_lat</span> <span class="o">=</span> <span class="n">append</span><span class="p">(</span><span class="n">lat_bounds</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[::</span><span class="mi">2</span><span class="p">],</span> <span class="n">lat_bounds</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">right_edge_lat</span> <span class="o">=</span> <span class="n">flip</span><span class="p">(</span><span class="n">left_edge_lat</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">top_edge_lat</span> <span class="o">=</span> <span class="n">repeat</span><span class="p">(</span><span class="n">lat_bounds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">bottom_edge_lat</span> <span class="o">=</span> <span class="n">repeat</span><span class="p">(</span><span class="n">lat_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lon</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]))</span>
+        <span class="n">lat_grid_edge</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">((</span><span class="n">left_edge_lat</span><span class="p">,</span> <span class="n">top_edge_lat</span><span class="p">,</span> <span class="n">right_edge_lat</span><span class="p">,</span> <span class="n">bottom_edge_lat</span><span class="p">))</span>
+
+        <span class="c1"># Get longitudes for grid edge</span>
+        <span class="n">left_edge_lon</span> <span class="o">=</span> <span class="n">repeat</span><span class="p">(</span><span class="n">lon_bounds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">top_edge_lon</span> <span class="o">=</span> <span class="n">lon_bounds</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">right_edge_lon</span> <span class="o">=</span> <span class="n">repeat</span><span class="p">(</span><span class="n">lon_bounds</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lat</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">bottom_edge_lon</span> <span class="o">=</span> <span class="n">flip</span><span class="p">(</span><span class="n">lon_bounds</span><span class="o">.</span><span class="n">flatten</span><span class="p">()[:</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">lon_grid_edge</span> <span class="o">=</span> <span class="n">concatenate</span><span class="p">((</span><span class="n">left_edge_lon</span><span class="p">,</span> <span class="n">top_edge_lon</span><span class="p">,</span> <span class="n">right_edge_lon</span><span class="p">,</span> <span class="n">bottom_edge_lon</span><span class="p">))</span>
+
+        <span class="c1"># Create grid outline by stacking the edges in both coordinates</span>
+        <span class="n">model_grid_outline</span> <span class="o">=</span> <span class="n">vstack</span><span class="p">((</span><span class="n">lon_grid_edge</span><span class="p">,</span> <span class="n">lat_grid_edge</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">grid_edge_lat</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">model_grid_outline</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]}</span>
+        <span class="n">grid_edge_lon</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="n">model_grid_outline</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]}</span>
+
+        <span class="k">return</span> <span class="n">grid_edge_lat</span><span class="p">,</span> <span class="n">grid_edge_lon</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_set_var_crs</span><span class="p">(</span><span class="n">var</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set the grid_mapping to &quot;crs&quot;.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        var : Variable</span>
+<span class="sd">            netCDF4-python variable object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">var</span><span class="o">.</span><span class="n">grid_mapping</span> <span class="o">=</span> <span class="s2">&quot;crs&quot;</span>
+        <span class="n">var</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="s2">&quot;lat lon&quot;</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_create_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">netcdf</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create the &quot;crs&quot; variable for the rotated latitude longitude grid_mapping.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        netcdf : Dataset</span>
+<span class="sd">            netcdf4-python Dataset.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="n">netcdf</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s2">&quot;crs&quot;</span><span class="p">,</span> <span class="s2">&quot;i&quot;</span><span class="p">)</span>
+            <span class="n">mapping</span><span class="o">.</span><span class="n">grid_mapping_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;grid_mapping_name&quot;</span><span class="p">]</span>
+            <span class="n">mapping</span><span class="o">.</span><span class="n">semi_major_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;semi_major_axis&quot;</span><span class="p">]</span>
+            <span class="n">mapping</span><span class="o">.</span><span class="n">inverse_flattening</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection_data</span><span class="p">[</span><span class="s2">&quot;inverse_flattening&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="LatLonNes.to_grib2">
+<a class="viewcode-back" href="../../../projections.html#nes.nc_projections.latlon_nes.LatLonNes.to_grib2">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_grib2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">grib_keys</span><span class="p">,</span> <span class="n">grib_template_path</span><span class="p">,</span> <span class="n">lat_flip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Write output file with grib2 format.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        lat_flip : bool</span>
+<span class="sd">            Indicates if the latitudes have to be flipped</span>
+<span class="sd">        path : str</span>
+<span class="sd">            Path to the output file.</span>
+<span class="sd">        grib_keys : dict</span>
+<span class="sd">            Dictionary with the grib2 keys.</span>
+<span class="sd">        grib_template_path : str</span>
+<span class="sd">            Path to the grib2 file to use as template.</span>
+<span class="sd">        info : bool</span>
+<span class="sd">            Indicates if you want to print extra information during the process.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">LatLonNes</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">to_grib2</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">grib_keys</span><span class="p">,</span> <span class="n">grib_template_path</span><span class="p">,</span> <span class="n">lat_flip</span><span class="o">=</span><span class="n">lat_flip</span><span class="p">,</span> <span class="n">info</span><span class="o">=</span><span class="n">info</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Carles Tena Medina, Alba Vilanova Cortezon.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
